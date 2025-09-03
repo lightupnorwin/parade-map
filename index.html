@@ -2,131 +2,136 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Light Up Norwin Parade Map</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <title>Light Up Norwin Parade Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
-    body {
+    body, html {
       margin: 0;
-      padding: 0;
-      font-family: "Segoe UI", sans-serif;
-      background: #111;
-      color: #fff;
+      height: 100%;
+      width: 100%;
+      font-family: "Segoe UI", Roboto, sans-serif;
+      background: #1a1a1a;
     }
     #map {
+      height: 100%;
       width: 100%;
-      height: 100vh;
     }
-    .filters {
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 8px;
-      z-index: 1000;
-    }
-    .filters button {
-      background: #333;
-      border: none;
-      border-radius: 20px;
-      padding: 6px 14px;
+    .popup-card {
+      width: 220px;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
       font-size: 14px;
-      color: #fff;
-      cursor: pointer;
-      transition: all 0.2s;
     }
-    .filters button.active,
-    .filters button:hover {
-      background: #e63946;
+    .popup-header {
+      background: #c8102e; /* Rotary red */
+      color: #fff;
+      padding: 8px 12px;
+      font-weight: bold;
+      text-align: center;
+    }
+    .popup-body {
+      padding: 10px;
+      color: #333;
+    }
+    .schedule {
+      margin: 8px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    .schedule li {
+      margin: 4px 0;
     }
   </style>
 </head>
 <body>
-  <div class="filters">
-    <button data-cat="all" class="active">All</button>
-    <button data-cat="event">Events</button>
-    <button data-cat="restroom">Restrooms</button>
-    <button data-cat="food">Food & Beverage</button>
-    <button data-cat="shopping">Shopping</button>
-  </div>
   <div id="map"></div>
-
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    // Initialize map
-    const map = L.map("map").setView([40.3321, -79.7106], 18);
+    const map = L.map("map").setView([40.3322, -79.7109], 18);
 
-    // Add tile layer (OpenStreetMap)
+    // OSM tiles
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "© OpenStreetMap contributors",
+      attribution: "© OpenStreetMap contributors"
     }).addTo(map);
 
     // Locations
     const locations = [
       {
-        pos: [40.332008, -79.711068],
+        coords: [40.332008, -79.711068],
         name: "Main Street Stage",
-        desc: "Live entertainment at the arch.",
-        cat: "event",
+        content: `
+          <div class="popup-card">
+            <div class="popup-header">Main Street Stage</div>
+            <div class="popup-body">
+              Live entertainment all evening!<br><br>
+              <strong>Schedule:</strong>
+              <ul class="schedule">
+                <li>Band A – 4:00 PM</li>
+                <li>Band B – 6:00 PM</li>
+                <li>Band C – 8:00 PM</li>
+              </ul>
+            </div>
+          </div>
+        `
       },
       {
-        pos: [40.33234, -79.70999], // Converted Plus Code 87JQ+HJ
-        name: "Restrooms",
-        desc: "415 Main St — Porta-potties available.",
-        cat: "restroom",
-      },
-      {
-        pos: [40.332795, -79.710338],
+        coords: [40.332795, -79.710338],
         name: "Tree Lighting",
-        desc: "At S&T Bank, starts at 6 PM.",
-        cat: "event",
+        content: `
+          <div class="popup-card">
+            <div class="popup-header">Tree Lighting</div>
+            <div class="popup-body">
+              Join us at S&T Bank for the official tree lighting at <strong>6:00 PM</strong>.
+            </div>
+          </div>
+        `
       },
       {
-        pos: [40.331993, -79.710851],
-        name: "Food Vendor (Pretend)",
-        desc: "Serving snacks & drinks.",
-        cat: "food",
+        coords: [40.3314911, -79.710878],
+        name: "Bathrooms",
+        content: `
+          <div class="popup-card">
+            <div class="popup-header">Restrooms</div>
+            <div class="popup-body">
+              Portable restrooms available here (415 Main St).
+            </div>
+          </div>
+        `
       },
       {
-        pos: [40.332086, -79.710864],
-        name: "Craft Vendor (Pretend)",
-        desc: "Handmade gifts & crafts.",
-        cat: "shopping",
+        coords: [40.331993, -79.710851],
+        name: "Food Vendor",
+        content: `
+          <div class="popup-card">
+            <div class="popup-header">Food Vendor</div>
+            <div class="popup-body">
+              Pretend vendor – hot food and drinks.<br>
+              <em>Final vendors will appear here soon.</em>
+            </div>
+          </div>
+        `
       },
+      {
+        coords: [40.332086, -79.710864],
+        name: "Craft Vendor",
+        content: `
+          <div class="popup-card">
+            <div class="popup-header">Craft Vendor</div>
+            <div class="popup-body">
+              Pretend craft vendor – handmade gifts.<br>
+              <em>Final vendors will appear here soon.</em>
+            </div>
+          </div>
+        `
+      }
     ];
 
-    // Marker storage
-    const markers = [];
-
-    // Create markers
-    locations.forEach((loc) => {
-      const marker = L.marker(loc.pos).bindPopup(
-        `<strong>${loc.name}</strong><br/>${loc.desc}`
-      );
-      marker.cat = loc.cat;
-      marker.addTo(map);
-      markers.push(marker);
-    });
-
-    // Filter logic
-    const buttons = document.querySelectorAll(".filters button");
-    buttons.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        buttons.forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
-        const cat = btn.dataset.cat;
-        markers.forEach((m) => {
-          if (cat === "all" || m.cat === cat) {
-            map.addLayer(m);
-          } else {
-            map.removeLayer(m);
-          }
-        });
-      });
+    // Add markers
+    locations.forEach(loc => {
+      L.marker(loc.coords).addTo(map).bindPopup(loc.content);
     });
   </script>
 </body>
