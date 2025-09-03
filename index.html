@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Live Parade Map</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-pco0nJB2zD3RzT1Q9WI1F7c5i7qS8WcUbexd2v8qn3c="
+      crossorigin=""
+    />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        background-color: #111;
+      }
+      #map {
+        width: 100%;
+        height: 100%;
+      }
+      .leaflet-popup-content-wrapper {
+        background: #333;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-o9N1j7kM60D5W8XJyZ4aYV5C5g5WbzzLlCF3h8WkLQw="
+      crossorigin=""
+    ></script>
+    <script>
+      const map = L.map("map").setView([40.327, -79.704], 18);
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map);
+
+      const locations = [
+        {
+          position: [40.327065, -79.704679],
+          name: "Main Stage",
+          description: "Live entertainment all evening!"
+        },
+        {
+          position: [40.327174, -79.704903],
+          name: "Restroom",
+          description: "Porta-potties available here."
+        },
+        {
+          position: [40.327263, -79.704489],
+          name: "Tree Lighting",
+          description: "At S&T Bank, starts at 6 PM."
+        },
+        {
+          position: [40.32736, -79.705],
+          name: "Aunt Patty’s Pierogis",
+          description: "Serving hot pierogis all night."
+        }
+      ];
+
+      locations.forEach((loc) => {
+        L.marker(loc.position).addTo(map)
+          .bindPopup(`<strong>${loc.name}</strong><br>${loc.description}`);
+      });
+    </script>
+  </body>
+</html>
