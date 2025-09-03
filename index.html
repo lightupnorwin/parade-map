@@ -1,138 +1,146 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Light Up Norwin Parade Map</title>
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet/dist/leaflet.css"
-  />
-  <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background: #111;
-      color: #fff;
-    }
-    #map {
-      width: 100%;
-      height: calc(100% - 60px);
-    }
-    .filter-bar {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      padding: 10px;
-      background: #1c1c1c;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.6);
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-    }
-    .filter-btn {
-      border: none;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 14px;
-      cursor: pointer;
-      color: #fff;
-      font-weight: 600;
-      transition: all 0.2s ease;
-    }
-    .filter-btn.active {
-      transform: scale(1.05);
-      box-shadow: 0 0 8px rgba(255,255,255,0.5);
-    }
-    .events { background: #e63946; }    /* red */
-    .restrooms { background: #457b9d; } /* blue */
-    .food { background: #f4a261; }      /* orange */
-    .shopping { background: #9d4edd; }  /* purple */
-  </style>
-</head>
-<body>
-  <div class="filter-bar">
-    <button class="filter-btn events active" onclick="filterMarkers('event')">Events</button>
-    <button class="filter-btn restrooms active" onclick="filterMarkers('restroom')">Restrooms</button>
-    <button class="filter-btn food active" onclick="filterMarkers('food')">Food</button>
-    <button class="filter-btn shopping active" onclick="filterMarkers('shopping')">Shopping</button>
-  </div>
-  <div id="map"></div>
-
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <script>
-    const map = L.map("map").setView([40.3320, -79.7110], 18);
-
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 20,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
-    }).addTo(map);
-
-    const markers = [
-      {
-        position: [40.332008, -79.711068],
-        name: "Main Street Stage",
-        description: "Band at 4 PM, Band at 6 PM, Dance Group at 7 PM.",
-        type: "event"
-      },
-      {
-        position: [40.332795, -79.710338],
-        name: "Tree Lighting",
-        description: "Join us at S&T Bank at 6 PM.",
-        type: "event"
-      },
-      {
-        position: [40.3314911, -79.710878],
-        name: "Restroom",
-        description: "Portable restrooms available here.",
-        type: "restroom"
-      },
-      {
-        position: [40.331993, -79.710851],
-        name: "Food Vendor",
-        description: "Hot food and drinks served here.",
-        type: "food"
-      },
-      {
-        position: [40.332086, -79.710864],
-        name: "Craft Vendor",
-        description: "Handmade crafts and gifts.",
-        type: "shopping"
+<html>
+  <head>
+    <title>Light Up Norwin Map</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      html, body, #map {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
       }
-    ];
+      #filterBar {
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 999;
+        display: flex;
+        gap: 10px;
+        background: rgba(255,255,255,0.9);
+        border-radius: 10px;
+        padding: 5px 10px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      }
+      .filter-btn {
+        padding: 6px 12px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        background-color: #f0f0f0;
+        font-weight: bold;
+        transition: background-color 0.3s;
+      }
+      .filter-btn.active {
+        background-color: white;
+        box-shadow: 0 0 0 2px #007bff inset;
+      }
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY"></script>
+    <script>
+      let map;
+      let markers = [];
+      const filters = {
+        Restrooms: true,
+        Events: true,
+        Food: true,
+        Shopping: true
+      };
 
-    const layerGroup = L.layerGroup().addTo(map);
-    const markerMap = [];
+      const categoryColors = {
+        Restrooms: 'blue',
+        Events: 'red',
+        Food: 'green',
+        Shopping: 'orange'
+      };
 
-    function renderMarkers() {
-      layerGroup.clearLayers();
-      markers.forEach(m => {
-        if (activeFilters.includes(m.type)) {
-          const marker = L.marker(m.position).bindPopup(
-            `<strong>${m.name}</strong><br>${m.description}`
-          );
-          marker.addTo(layerGroup);
-          markerMap.push({ marker, type: m.type });
+      const locations = [
+        {
+          type: 'Restrooms',
+          title: 'Restrooms',
+          position: { lat: 40.3314911, lng: -79.710878 }
+        },
+        {
+          type: 'Events',
+          title: 'Main Street Stage',
+          position: { lat: 40.332008, lng: -79.711068 },
+          info: '<strong>Main Street Stage</strong><br>Band at 4:00 PM<br>Band at 6:00 PM'
+        },
+        {
+          type: 'Events',
+          title: 'Tree Lighting',
+          position: { lat: 40.332795, lng: -79.710338 },
+          info: '<strong>Tree Lighting</strong><br>Begins at dusk'
+        },
+        {
+          type: 'Food',
+          title: 'Food Vendor (Example)',
+          position: { lat: 40.331993, lng: -79.710851 }
+        },
+        {
+          type: 'Shopping',
+          title: 'Craft Vendor (Example)',
+          position: { lat: 40.332086, lng: -79.710864 }
         }
-      });
-    }
+      ];
 
-    let activeFilters = ["event","restroom","food","shopping"];
+      function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+          center: { lat: 40.3321, lng: -79.7108 },
+          zoom: 18,
+          mapId: 'a6e39d81a25f4fd4' // Optional: Add your custom styled map ID here
+        });
 
-    function filterMarkers(type) {
-      if (activeFilters.includes(type)) {
-        activeFilters = activeFilters.filter(t => t !== type);
-        document.querySelector(`.filter-btn.${type === "event" ? "events" : type+"s"}`).classList.remove("active");
-      } else {
-        activeFilters.push(type);
-        document.querySelector(`.filter-btn.${type === "event" ? "events" : type+"s"}`).classList.add("active");
+        addMarkers();
       }
-      renderMarkers();
-    }
 
-    renderMarkers();
-  </script>
-</body>
+      function addMarkers() {
+        clearMarkers();
+        locations.forEach(loc => {
+          if (filters[loc.type]) {
+            const marker = new google.maps.Marker({
+              position: loc.position,
+              map: map,
+              title: loc.title,
+              icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 8,
+                fillColor: categoryColors[loc.type],
+                fillOpacity: 1,
+                strokeWeight: 1
+              }
+            });
+            if (loc.info) {
+              const infoWindow = new google.maps.InfoWindow({ content: loc.info });
+              marker.addListener('click', () => infoWindow.open(map, marker));
+            }
+            markers.push(marker);
+          }
+        });
+      }
+
+      function clearMarkers() {
+        markers.forEach(m => m.setMap(null));
+        markers = [];
+      }
+
+      function toggleFilter(type) {
+        filters[type] = !filters[type];
+        document.getElementById('btn-' + type).classList.toggle('active', filters[type]);
+        addMarkers();
+      }
+
+      window.onload = initMap;
+    </script>
+  </head>
+  <body>
+    <div id="filterBar">
+      <button class="filter-btn active" id="btn-Restrooms" onclick="toggleFilter('Restrooms')">Restrooms</button>
+      <button class="filter-btn active" id="btn-Events" onclick="toggleFilter('Events')">Events</button>
+      <button class="filter-btn active" id="btn-Food" onclick="toggleFilter('Food')">Food & Beverage</button>
+      <button class="filter-btn active" id="btn-Shopping" onclick="toggleFilter('Shopping')">Shopping</button>
+    </div>
+    <div id="map"></div>
+  </body>
 </html>
