@@ -2,219 +2,137 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Light Up Norwin Parade Map</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet/dist/leaflet.css"
+  />
   <style>
     body, html {
       margin: 0;
+      padding: 0;
       height: 100%;
-      width: 100%;
-      font-family: "Segoe UI", Roboto, sans-serif;
-      background: #1a1a1a;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #111;
+      color: #fff;
     }
     #map {
-      height: 100%;
       width: 100%;
+      height: calc(100% - 60px);
     }
     .filter-bar {
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(255, 255, 255, 0.9);
-      padding: 4px;
-      border-radius: 20px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
       display: flex;
-      gap: 4px;
+      justify-content: center;
+      gap: 12px;
+      padding: 10px;
+      background: #1c1c1c;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+      position: sticky;
+      top: 0;
       z-index: 1000;
     }
     .filter-btn {
       border: none;
-      background: transparent;
-      padding: 6px 14px;
-      border-radius: 16px;
+      padding: 8px 16px;
+      border-radius: 20px;
       font-size: 14px;
-      font-weight: 500;
       cursor: pointer;
-      color: #333;
+      color: #fff;
+      font-weight: 600;
       transition: all 0.2s ease;
     }
     .filter-btn.active {
-      background: #c8102e;
-      color: #fff;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      transform: scale(1.05);
+      box-shadow: 0 0 8px rgba(255,255,255,0.5);
     }
-    .popup-card {
-      width: 220px;
-      background: #fff;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-      font-size: 14px;
-    }
-    .popup-header {
-      background: #c8102e; /* Rotary red */
-      color: #fff;
-      padding: 8px 12px;
-      font-weight: bold;
-      text-align: center;
-    }
-    .popup-body {
-      padding: 10px;
-      color: #333;
-    }
-    .schedule {
-      margin: 8px 0 0;
-      padding: 0;
-      list-style: none;
-    }
-    .schedule li {
-      margin: 4px 0;
-    }
+    .events { background: #e63946; }    /* red */
+    .restrooms { background: #457b9d; } /* blue */
+    .food { background: #f4a261; }      /* orange */
+    .shopping { background: #9d4edd; }  /* purple */
   </style>
 </head>
 <body>
-  <div id="map"></div>
-
   <div class="filter-bar">
-    <button class="filter-btn active" data-category="Events">Events</button>
-    <button class="filter-btn active" data-category="Restrooms">Restrooms</button>
-    <button class="filter-btn active" data-category="Food">Food</button>
-    <button class="filter-btn active" data-category="Shopping">Shopping</button>
+    <button class="filter-btn events active" onclick="filterMarkers('event')">Events</button>
+    <button class="filter-btn restrooms active" onclick="filterMarkers('restroom')">Restrooms</button>
+    <button class="filter-btn food active" onclick="filterMarkers('food')">Food</button>
+    <button class="filter-btn shopping active" onclick="filterMarkers('shopping')">Shopping</button>
   </div>
+  <div id="map"></div>
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    const map = L.map("map").setView([40.3322, -79.7109], 18);
+    const map = L.map("map").setView([40.3320, -79.7110], 18);
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "© OpenStreetMap contributors"
+      maxZoom: 20,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
     }).addTo(map);
 
-    // Generic colored icons
-    const icons = {
-      Events: new L.Icon({
-        iconUrl: "https://cdn.jsdelivr.net/gh/pointhi/leaflet-color-markers@master/img/marker-icon-blue.png",
-        shadowUrl: "https://unpkg.com/leaflet/dist/images/marker-shadow.png",
-        iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
-      }),
-      Restrooms: new L.Icon({
-        iconUrl: "https://cdn.jsdelivr.net/gh/pointhi/leaflet-color-markers@master/img/marker-icon-green.png",
-        shadowUrl: "https://unpkg.com/leaflet/dist/images/marker-shadow.png",
-        iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
-      }),
-      Food: new L.Icon({
-        iconUrl: "https://cdn.jsdelivr.net/gh/pointhi/leaflet-color-markers@master/img/marker-icon-orange.png",
-        shadowUrl: "https://unpkg.com/leaflet/dist/images/marker-shadow.png",
-        iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
-      }),
-      Shopping: new L.Icon({
-        iconUrl: "https://cdn.jsdelivr.net/gh/pointhi/leaflet-color-markers@master/img/marker-icon-violet.png",
-        shadowUrl: "https://unpkg.com/leaflet/dist/images/marker-shadow.png",
-        iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
-      })
-    };
-
-    const locations = [
+    const markers = [
       {
-        coords: [40.332008, -79.711068],
-        category: "Events",
-        content: `
-          <div class="popup-card">
-            <div class="popup-header">Main Street Stage</div>
-            <div class="popup-body">
-              Live entertainment all evening!<br><br>
-              <strong>Schedule:</strong>
-              <ul class="schedule">
-                <li>Band A – 4:00 PM</li>
-                <li>Band B – 6:00 PM</li>
-                <li>Band C – 8:00 PM</li>
-              </ul>
-            </div>
-          </div>
-        `
+        position: [40.332008, -79.711068],
+        name: "Main Street Stage",
+        description: "Band at 4 PM, Band at 6 PM, Dance Group at 7 PM.",
+        type: "event"
       },
       {
-        coords: [40.332795, -79.710338],
-        category: "Events",
-        content: `
-          <div class="popup-card">
-            <div class="popup-header">Tree Lighting</div>
-            <div class="popup-body">
-              Join us at S&T Bank for the official tree lighting at <strong>6:00 PM</strong>.
-            </div>
-          </div>
-        `
+        position: [40.332795, -79.710338],
+        name: "Tree Lighting",
+        description: "Join us at S&T Bank at 6 PM.",
+        type: "event"
       },
       {
-        coords: [40.3314911, -79.710878],
-        category: "Restrooms",
-        content: `
-          <div class="popup-card">
-            <div class="popup-header">Restrooms</div>
-            <div class="popup-body">
-              Portable restrooms available here (415 Main St).
-            </div>
-          </div>
-        `
+        position: [40.3314911, -79.710878],
+        name: "Restroom",
+        description: "Portable restrooms available here.",
+        type: "restroom"
       },
       {
-        coords: [40.331993, -79.710851],
-        category: "Food",
-        content: `
-          <div class="popup-card">
-            <div class="popup-header">Food Vendor</div>
-            <div class="popup-body">
-              Pretend vendor – hot food and drinks.<br>
-              <em>Final vendors will appear here soon.</em>
-            </div>
-          </div>
-        `
+        position: [40.331993, -79.710851],
+        name: "Food Vendor",
+        description: "Hot food and drinks served here.",
+        type: "food"
       },
       {
-        coords: [40.332086, -79.710864],
-        category: "Shopping",
-        content: `
-          <div class="popup-card">
-            <div class="popup-header">Craft Vendor</div>
-            <div class="popup-body">
-              Pretend craft vendor – handmade gifts.<br>
-              <em>Final vendors will appear here soon.</em>
-            </div>
-          </div>
-        `
+        position: [40.332086, -79.710864],
+        name: "Craft Vendor",
+        description: "Handmade crafts and gifts.",
+        type: "shopping"
       }
     ];
 
-    const markers = [];
+    const layerGroup = L.layerGroup().addTo(map);
+    const markerMap = [];
 
     function renderMarkers() {
-      markers.forEach(m => map.removeLayer(m));
-      markers.length = 0;
-
-      const activeFilters = Array.from(document.querySelectorAll(".filter-btn.active"))
-        .map(btn => btn.dataset.category);
-
-      locations.forEach(loc => {
-        if (activeFilters.includes(loc.category)) {
-          const marker = L.marker(loc.coords, { icon: icons[loc.category] })
-            .addTo(map)
-            .bindPopup(loc.content);
-          markers.push(marker);
+      layerGroup.clearLayers();
+      markers.forEach(m => {
+        if (activeFilters.includes(m.type)) {
+          const marker = L.marker(m.position).bindPopup(
+            `<strong>${m.name}</strong><br>${m.description}`
+          );
+          marker.addTo(layerGroup);
+          markerMap.push({ marker, type: m.type });
         }
       });
     }
 
-    renderMarkers();
+    let activeFilters = ["event","restroom","food","shopping"];
 
-    document.querySelectorAll(".filter-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        btn.classList.toggle("active");
-        renderMarkers();
-      });
-    });
+    function filterMarkers(type) {
+      if (activeFilters.includes(type)) {
+        activeFilters = activeFilters.filter(t => t !== type);
+        document.querySelector(`.filter-btn.${type === "event" ? "events" : type+"s"}`).classList.remove("active");
+      } else {
+        activeFilters.push(type);
+        document.querySelector(`.filter-btn.${type === "event" ? "events" : type+"s"}`).classList.add("active");
+      }
+      renderMarkers();
+    }
+
+    renderMarkers();
   </script>
 </body>
 </html>
