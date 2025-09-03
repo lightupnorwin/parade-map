@@ -17,6 +17,35 @@
       height: 100%;
       width: 100%;
     }
+    .filter-bar {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 255, 255, 0.9);
+      padding: 4px;
+      border-radius: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      display: flex;
+      gap: 4px;
+      z-index: 1000;
+    }
+    .filter-btn {
+      border: none;
+      background: transparent;
+      padding: 6px 14px;
+      border-radius: 16px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      color: #333;
+      transition: all 0.2s ease;
+    }
+    .filter-btn.active {
+      background: #c8102e;
+      color: #fff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
     .popup-card {
       width: 220px;
       background: #fff;
@@ -48,20 +77,50 @@
 </head>
 <body>
   <div id="map"></div>
+
+  <div class="filter-bar">
+    <button class="filter-btn active" data-category="Events">Events</button>
+    <button class="filter-btn active" data-category="Restrooms">Restrooms</button>
+    <button class="filter-btn active" data-category="Food">Food</button>
+    <button class="filter-btn active" data-category="Shopping">Shopping</button>
+  </div>
+
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
     const map = L.map("map").setView([40.3322, -79.7109], 18);
 
-    // OSM tiles
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: "© OpenStreetMap contributors"
     }).addTo(map);
 
-    // Locations
+    // Generic colored icons
+    const icons = {
+      Events: new L.Icon({
+        iconUrl: "https://cdn.jsdelivr.net/gh/pointhi/leaflet-color-markers@master/img/marker-icon-blue.png",
+        shadowUrl: "https://unpkg.com/leaflet/dist/images/marker-shadow.png",
+        iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+      }),
+      Restrooms: new L.Icon({
+        iconUrl: "https://cdn.jsdelivr.net/gh/pointhi/leaflet-color-markers@master/img/marker-icon-green.png",
+        shadowUrl: "https://unpkg.com/leaflet/dist/images/marker-shadow.png",
+        iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+      }),
+      Food: new L.Icon({
+        iconUrl: "https://cdn.jsdelivr.net/gh/pointhi/leaflet-color-markers@master/img/marker-icon-orange.png",
+        shadowUrl: "https://unpkg.com/leaflet/dist/images/marker-shadow.png",
+        iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+      }),
+      Shopping: new L.Icon({
+        iconUrl: "https://cdn.jsdelivr.net/gh/pointhi/leaflet-color-markers@master/img/marker-icon-violet.png",
+        shadowUrl: "https://unpkg.com/leaflet/dist/images/marker-shadow.png",
+        iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+      })
+    };
+
     const locations = [
       {
         coords: [40.332008, -79.711068],
-        name: "Main Street Stage",
+        category: "Events",
         content: `
           <div class="popup-card">
             <div class="popup-header">Main Street Stage</div>
@@ -79,7 +138,7 @@
       },
       {
         coords: [40.332795, -79.710338],
-        name: "Tree Lighting",
+        category: "Events",
         content: `
           <div class="popup-card">
             <div class="popup-header">Tree Lighting</div>
@@ -91,7 +150,7 @@
       },
       {
         coords: [40.3314911, -79.710878],
-        name: "Bathrooms",
+        category: "Restrooms",
         content: `
           <div class="popup-card">
             <div class="popup-header">Restrooms</div>
@@ -103,7 +162,7 @@
       },
       {
         coords: [40.331993, -79.710851],
-        name: "Food Vendor",
+        category: "Food",
         content: `
           <div class="popup-card">
             <div class="popup-header">Food Vendor</div>
@@ -116,7 +175,7 @@
       },
       {
         coords: [40.332086, -79.710864],
-        name: "Craft Vendor",
+        category: "Shopping",
         content: `
           <div class="popup-card">
             <div class="popup-header">Craft Vendor</div>
@@ -129,9 +188,32 @@
       }
     ];
 
-    // Add markers
-    locations.forEach(loc => {
-      L.marker(loc.coords).addTo(map).bindPopup(loc.content);
+    const markers = [];
+
+    function renderMarkers() {
+      markers.forEach(m => map.removeLayer(m));
+      markers.length = 0;
+
+      const activeFilters = Array.from(document.querySelectorAll(".filter-btn.active"))
+        .map(btn => btn.dataset.category);
+
+      locations.forEach(loc => {
+        if (activeFilters.includes(loc.category)) {
+          const marker = L.marker(loc.coords, { icon: icons[loc.category] })
+            .addTo(map)
+            .bindPopup(loc.content);
+          markers.push(marker);
+        }
+      });
+    }
+
+    renderMarkers();
+
+    document.querySelectorAll(".filter-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        btn.classList.toggle("active");
+        renderMarkers();
+      });
     });
   </script>
 </body>
