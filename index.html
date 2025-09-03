@@ -9,7 +9,7 @@
     html, body { height: 100%; margin: 0; }
     #map { height: 100%; width: 100%; }
 
-    /* Disney-ish segmented filter bar */
+    /* Disney-style segmented filter bar */
     .filter-bar {
       position: absolute;
       top: 10px;
@@ -24,21 +24,37 @@
       z-index: 1000;
     }
     .filter-btn {
-      border: 2px solid #007aff;
-      background: #fff;
-      color: #007aff;
       border-radius: 999px;
       padding: 6px 12px;
       font-weight: 700;
       cursor: pointer;
       transition: .2s ease;
       user-select: none;
-    }
-    .filter-btn.active {
-      background: #007aff;
+      border: 2px solid transparent;
       color: #fff;
     }
-    /* Small popup styling */
+    .filter-btn.Restrooms {
+      background: #007aff;
+      border-color: #007aff;
+    }
+    .filter-btn.Events {
+      background: #ff3b30;
+      border-color: #ff3b30;
+    }
+    .filter-btn.Food {
+      background: #34c759;
+      border-color: #34c759;
+    }
+    .filter-btn.Shopping {
+      background: #af52de;
+      border-color: #af52de;
+    }
+    .filter-btn.inactive {
+      background: #fff !important;
+      color: inherit !important;
+    }
+
+    /* Popup styling */
     .popup h3 {
       margin: 0 0 4px;
       font-size: 16px;
@@ -54,15 +70,14 @@
   <div id="map"></div>
 
   <div class="filter-bar">
-    <button class="filter-btn active" data-category="Restrooms">Restrooms</button>
-    <button class="filter-btn active" data-category="Events">Events</button>
-    <button class="filter-btn active" data-category="Food">Food &amp; Beverage</button>
-    <button class="filter-btn active" data-category="Shopping">Shopping</button>
+    <button class="filter-btn Restrooms" data-category="Restrooms">Restrooms</button>
+    <button class="filter-btn Events" data-category="Events">Events</button>
+    <button class="filter-btn Food" data-category="Food">Food &amp; Beverage</button>
+    <button class="filter-btn Shopping" data-category="Shopping">Shopping</button>
   </div>
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    // Base map
     const map = L.map('map', { zoomControl: true })
       .setView([40.332, -79.7105], 18);
 
@@ -71,69 +86,30 @@
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    // Category colors (also used on markers)
     const colors = {
-      Restrooms: "#007aff",  // blue
-      Events:    "#ff3b30",  // red
-      Food:      "#34c759",  // green
-      Shopping:  "#af52de"   // purple
+      Restrooms: "#007aff",
+      Events:    "#ff3b30",
+      Food:      "#34c759",
+      Shopping:  "#af52de"
     };
 
-    // Your current points
     const locations = [
-      // Restroom: 415 Main St (corrected)
-      {
-        position: [40.3314911, -79.710878],
-        name: "Restrooms",
-        description: "Public restrooms at 415 Main St.",
-        category: "Restrooms"
-      },
-      // Tree Lighting event
-      {
-        position: [40.332795, -79.710338],
-        name: "Tree Lighting",
-        description: "At S&amp;T Bank. Ceremony starts at 6 PM.",
-        category: "Events"
-      },
-      // Main Street Stage with a tiny schedule
-      {
-        position: [40.332008, -79.711068],
-        name: "Main Street Stage",
-        description: "<strong>Schedule</strong><br>4:00 PM – Band<br>6:00 PM – Band",
-        category: "Events"
-      },
-      // Pretend food vendor
-      {
-        position: [40.331993, -79.710851],
-        name: "Pretend Food Vendor",
-        description: "Serving warm treats all evening.",
-        category: "Food"
-      },
-      // Pretend craft vendor
-      {
-        position: [40.332086, -79.710864],
-        name: "Pretend Craft Vendor",
-        description: "Handmade gifts and holiday crafts.",
-        category: "Shopping"
-      }
+      { position: [40.3314911, -79.710878], name: "Restrooms", description: "Public restrooms at 415 Main St.", category: "Restrooms" },
+      { position: [40.332795, -79.710338], name: "Tree Lighting", description: "At S&T Bank. Ceremony starts at 6 PM.", category: "Events" },
+      { position: [40.332008, -79.711068], name: "Main Street Stage", description: "<strong>Schedule</strong><br>4:00 PM – Band<br>6:00 PM – Band", category: "Events" },
+      { position: [40.331993, -79.710851], name: "Pretend Food Vendor", description: "Serving warm treats all evening.", category: "Food" },
+      { position: [40.332086, -79.710864], name: "Pretend Craft Vendor", description: "Handmade gifts and holiday crafts.", category: "Shopping" }
     ];
 
-    // Build colored circle markers (no external icon URLs)
     const markers = [];
     function addMarker(loc) {
       const marker = L.circleMarker(loc.position, {
         radius: 9,
         weight: 2,
-        color: colors[loc.category],   // stroke
+        color: colors[loc.category],
         fillColor: colors[loc.category],
         fillOpacity: 0.85
-      })
-      .bindPopup(
-        `<div class="popup">
-          <h3>${loc.name}</h3>
-          <p>${loc.description}</p>
-        </div>`
-      );
+      }).bindPopup(`<div class="popup"><h3>${loc.name}</h3><p>${loc.description}</p></div>`);
 
       marker.category = loc.category;
       marker.addTo(map);
@@ -141,11 +117,10 @@
     }
     locations.forEach(addMarker);
 
-    // Filter logic (toggle buttons)
     const buttons = document.querySelectorAll('.filter-btn');
     buttons.forEach(btn => {
       btn.addEventListener('click', () => {
-        btn.classList.toggle('active');
+        btn.classList.toggle('inactive');
         updateMarkers();
       });
     });
@@ -153,7 +128,7 @@
     function updateMarkers() {
       const active = new Set(
         Array.from(buttons)
-          .filter(b => b.classList.contains('active'))
+          .filter(b => !b.classList.contains('inactive'))
           .map(b => b.dataset.category)
       );
       markers.forEach(m => {
