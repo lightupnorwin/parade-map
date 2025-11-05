@@ -6,44 +6,57 @@
 <title>Light Up Norwin Parade Map</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <style>
-  html,body{height:100%;margin:0;}
-  #map{height:100%;width:100%;}
-  :root{--brand:#1756ff;--ink:#111;--muted:#666;--bg:#fff;--card:#f7f7fb;}
+  html,body{height:100%;margin:0;overflow:hidden;}
+  #map{height:100%;width:100%;position:absolute;top:0;left:0;z-index:1;}
+  :root{--brand:#1756ff;--bg:#fff;--ink:#111;--muted:#666;}
+
   body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;}
 
-  /* Panels */
-  .view{display:none;padding:16px 14px 80px;max-width:780px;margin:0 auto;}
-  .view.active{display:block;animation:fadeIn .3s;}
-  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  /* Overlay panels (slide up like Disney app) */
+  .view{
+    position:absolute;bottom:-100%;left:0;width:100%;
+    background:linear-gradient(180deg,#fff 0%,#f8f9fb 100%);
+    border-top-left-radius:16px;border-top-right-radius:16px;
+    box-shadow:0 -3px 15px rgba(0,0,0,0.2);
+    padding:16px 18px 80px;
+    max-height:80%;
+    overflow-y:auto;
+    transition:bottom .4s ease;
+    z-index:10;
+  }
+  .view.active{bottom:60px;} /* slides above nav bar */
 
   h1{font-size:20px;margin:0 0 10px;}
-  .card{background:linear-gradient(180deg,#fff 0%,#f8f9fb 100%);
-        border-radius:16px;padding:12px 14px;margin-top:12px;
-        box-shadow:0 3px 8px rgba(0,0,0,0.05);}
+  .card{background:#fff;border-radius:16px;padding:12px 14px;
+        margin-top:12px;box-shadow:0 2px 6px rgba(0,0,0,0.08);}
   .row{display:flex;justify-content:space-between;align-items:center;
-       padding:8px 0;border-top:1px solid #e8e8ef;}
+       padding:8px 0;border-top:1px solid #eee;}
   .row:first-child{border-top:0;}
-  .btn{background:var(--brand);color:#fff;padding:8px 12px;border:none;
-       border-radius:8px;cursor:pointer;font-weight:600;}
+  .btn{background:var(--brand);color:#fff;padding:8px 12px;
+       border:none;border-radius:8px;cursor:pointer;font-weight:600;}
   .btn:active{transform:scale(0.97);}
   .muted{color:var(--muted);}
   .active-now{box-shadow:0 0 10px 2px var(--brand);border-radius:12px;}
 
   /* Floating map actions */
   .map-actions{position:absolute;bottom:90px;right:20px;
-    display:flex;flex-direction:column;gap:10px;z-index:1000;}
+    display:flex;flex-direction:column;gap:10px;z-index:9;}
   .map-actions button{
     background:#fff;border:none;border-radius:50%;width:46px;height:46px;
     font-size:22px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.3);}
   .map-actions button:active{transform:scale(0.95);}
 
-  /* Bottom nav */
-  .nav-bar{position:fixed;bottom:0;left:0;width:100%;height:60px;
+  /* Nav bar */
+  .nav-bar{
+    position:fixed;bottom:0;left:0;width:100%;height:60px;
     background:#fff;border-top:1px solid #ddd;
     display:flex;justify-content:space-around;align-items:center;
-    box-shadow:0 -2px 10px rgba(0,0,0,0.15);z-index:2000;}
-  .nav-item{flex:1;text-align:center;color:#555;font-size:12px;
-    text-decoration:none;font-weight:600;cursor:pointer;}
+    box-shadow:0 -2px 10px rgba(0,0,0,0.15);z-index:11;
+  }
+  .nav-item{
+    flex:1;text-align:center;color:#555;font-size:12px;
+    text-decoration:none;font-weight:600;cursor:pointer;
+  }
   .nav-item span{display:block;font-size:22px;margin-bottom:2px;}
   .nav-item.active{color:var(--brand);}
 </style>
@@ -51,12 +64,13 @@
 
 <body>
 <div id="map"></div>
+
 <div class="map-actions">
   <button id="locateMe">📍</button>
   <button id="resetView">🔄</button>
 </div>
 
-<!-- Schedule -->
+<!-- Panels -->
 <div id="view-schedule" class="view">
   <h1>📅 Schedule</h1>
   <div class="card">
@@ -66,7 +80,6 @@
   </div>
 </div>
 
-<!-- Vendors -->
 <div id="view-vendors" class="view">
   <h1>🍔 Food & Shopping</h1>
   <div class="card">
@@ -75,7 +88,6 @@
   </div>
 </div>
 
-<!-- Restrooms -->
 <div id="view-restrooms" class="view">
   <h1>🚻 Restrooms</h1>
   <div class="card">
@@ -84,7 +96,7 @@
   </div>
 </div>
 
-<!-- Nav bar -->
+<!-- Nav -->
 <nav class="nav-bar">
   <div class="nav-item active" data-view="map"><span>🗺️</span>Map</div>
   <div class="nav-item" data-view="schedule"><span>📅</span>Schedule</div>
@@ -94,46 +106,54 @@
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
-/* --- Map setup --- */
+/* Map setup (kept visible, never hidden) */
 const map=L.map('map',{zoomControl:true}).setView([40.332,-79.7105],18);
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:20,attribution:'&copy; OpenStreetMap'}).addTo(map);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+  {maxZoom:20,attribution:'&copy; OpenStreetMap'}).addTo(map);
 
 const colors={Restrooms:"#007aff",Events:"#ff3b30",Food:"#34c759",Shopping:"#af52de"};
 function makeIcon(emoji,color){
-  const svg=encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'><circle cx='20' cy='20' r='18' fill='${color}'/><text x='50%' y='55%' font-size='18' text-anchor='middle' fill='white'>${emoji}</text></svg>`);
+  const svg=encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'>
+    <circle cx='20' cy='20' r='18' fill='${color}'/>
+    <text x='50%' y='55%' font-size='18' text-anchor='middle' fill='white'>${emoji}</text>
+  </svg>`);
   return L.icon({iconUrl:"data:image/svg+xml,"+svg,iconSize:[30,30],iconAnchor:[15,30],popupAnchor:[0,-28]});
 }
-const icons={Restrooms:makeIcon("🚻",colors.Restrooms),Events:makeIcon("🎄",colors.Events),
-             Food:makeIcon("🍔",colors.Food),Shopping:makeIcon("🛍️",colors.Shopping)};
+const icons={Restrooms:makeIcon("🚻",colors.Restrooms),
+             Events:makeIcon("🎄",colors.Events),
+             Food:makeIcon("🍔",colors.Food),
+             Shopping:makeIcon("🛍️",colors.Shopping)};
 const locations=[
   {position:[40.3314911,-79.710878],name:"Restrooms",description:"Public restrooms at 415 Main St.",category:"Restrooms"},
   {position:[40.332795,-79.710338],name:"Tree Lighting",description:"At S&T Bank Plaza.",category:"Events"},
-  {position:[40.332008,-79.711068],name:"Main Street Stage",description:"Live music performances.",category:"Events"},
+  {position:[40.332008,-79.711068],name:"Main Street Stage",description:"Live performances.",category:"Events"},
   {position:[40.331993,-79.710851],name:"Food Vendor",description:"Serving warm treats all evening.",category:"Food"},
   {position:[40.332086,-79.710864],name:"Craft Vendor",description:"Handmade holiday crafts.",category:"Shopping"}
 ];
 const markers=[];
 locations.forEach(loc=>{
   const m=L.marker(loc.position,{icon:icons[loc.category]})
-    .bindPopup(`<div class="popup"><h3>${loc.name}</h3><p>${loc.description}</p></div>`).addTo(map);
+    .bindPopup(`<div class="popup"><h3>${loc.name}</h3><p>${loc.description}</p></div>`)
+    .addTo(map);
   m.name=loc.name;markers.push(m);
 });
-const group=L.featureGroup(markers);map.fitBounds(group.getBounds(),{padding:[40,40]});
+const group=L.featureGroup(markers);
+map.fitBounds(group.getBounds(),{padding:[40,40]});
 
-/* Focus a specific marker */
+/* Focus a specific location from a list */
 function focusLocation(name){
   const target=markers.find(m=>m.name===name);
   if(target){
-    showView('map');
+    hidePanels();
     map.setView(target.getLatLng(),19);
     target.openPopup();
   }
 }
 
-/* Locate / reset */
+/* Locate & reset buttons */
 document.getElementById("locateMe").onclick=()=>{
   navigator.geolocation?.getCurrentPosition(pos=>{
-    const{latitude,longitude}=pos.coords;
+    const {latitude,longitude}=pos.coords;
     map.setView([latitude,longitude],18);
     L.circleMarker([latitude,longitude],{radius:8,color:"#1756ff",fillOpacity:0.9})
       .addTo(map).bindPopup("You are here").openPopup();
@@ -141,38 +161,39 @@ document.getElementById("locateMe").onclick=()=>{
 };
 document.getElementById("resetView").onclick=()=>map.fitBounds(group.getBounds(),{padding:[40,40]});
 
-/* “Now Happening” highlight */
+/* Highlight now */
 const scheduleTimes=[{time:"16:00",id:"stage"},{time:"17:45",id:"tree"},{time:"18:15",id:"parade"}];
 function highlightNow(){
   const now=new Date();const mins=now.getHours()*60+now.getMinutes();
   scheduleTimes.forEach(s=>{
-    const[h,m]=s.time.split(":").map(Number);const t=h*60+m;
+    const [h,m]=s.time.split(":").map(Number);const t=h*60+m;
     const el=document.getElementById(s.id);
-    if(!el)return;
-    if(Math.abs(mins-t)<30)el.classList.add("active-now");
-    else el.classList.remove("active-now");
+    if(el){Math.abs(mins-t)<30?el.classList.add("active-now"):el.classList.remove("active-now");}
   });
 }
 highlightNow();setInterval(highlightNow,60000);
 
-/* --- Nav behaviour (toggle back to map) --- */
+/* Nav bar toggle behavior */
 const navItems=document.querySelectorAll('.nav-item');
-function showView(view){
-  // Toggle: if same tab clicked, go back to map
-  const current=document.querySelector('.view.active');
-  const isSame=current && current.id==='view-'+view;
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+const panels=document.querySelectorAll('.view');
+let current=null;
+
+function hidePanels(){
+  panels.forEach(v=>v.classList.remove('active'));
   navItems.forEach(n=>n.classList.remove('active'));
-  if(isSame || view==='map'){ // return to map
-    document.getElementById('map').style.display='block';
-    document.querySelector('.nav-item[data-view="map"]').classList.add('active');
-    return;
-  }
-  document.getElementById('map').style.display='none';
+  document.querySelector('.nav-item[data-view="map"]').classList.add('active');
+  current=null;
+}
+
+function togglePanel(view){
+  if(current===view || view==='map'){ hidePanels(); return; }
+  hidePanels();
   document.getElementById('view-'+view).classList.add('active');
   document.querySelector(`.nav-item[data-view="${view}"]`).classList.add('active');
+  current=view;
 }
-navItems.forEach(i=>i.addEventListener('click',()=>showView(i.dataset.view)));
+
+navItems.forEach(i=>i.addEventListener('click',()=>togglePanel(i.dataset.view)));
 </script>
 </body>
 </html>
