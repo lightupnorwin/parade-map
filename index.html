@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Light Up Norwin Parade Map</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+  <title>Light Up Norwin Parade Map</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <style>
   html,body{height:100%;margin:0;overflow:hidden;}
@@ -13,30 +14,27 @@
   body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;}
 
   /* Overlay panels (slide up like Disney app) */
-  .view{
-    position:absolute;bottom:-100%;left:0;width:100%;
-    background:linear-gradient(180deg,#fff 0%,#f8f9fb 100%);
-    border-top-left-radius:16px;border-top-right-radius:16px;
-    box-shadow:0 -3px 15px rgba(0,0,0,0.2);
-    padding:16px 18px 80px;
-    max-height:80%;
-    overflow-y:auto;
-    transition:bottom .4s ease;
-    z-index:10;
-  }
-  .view.active{bottom:60px;} /* slides above nav bar */
+.view {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  background: linear-gradient(180deg, #fff 0%, #f8f9fb 100%);
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  box-shadow: 0 -3px 15px rgba(0, 0, 0, 0.2);
+  padding: 16px 18px calc(80px + env(safe-area-inset-bottom)); /* space for nav */
+  max-height: 70vh;
+  overflow-y: auto;
+  transform: translateY(110%);
+  transition: transform 0.4s ease;
+  z-index: 10;
+  backdrop-filter: blur(8px);
+}
 
-  h1{font-size:20px;margin:0 0 10px;}
-  .card{background:#fff;border-radius:16px;padding:12px 14px;
-        margin-top:12px;box-shadow:0 2px 6px rgba(0,0,0,0.08);}
-  .row{display:flex;justify-content:space-between;align-items:center;
-       padding:8px 0;border-top:1px solid #eee;}
-  .row:first-child{border-top:0;}
-  .btn{background:var(--brand);color:#fff;padding:8px 12px;
-       border:none;border-radius:8px;cursor:pointer;font-weight:600;}
-  .btn:active{transform:scale(0.97);}
-  .muted{color:var(--muted);}
-  .active-now{box-shadow:0 0 10px 2px var(--brand);border-radius:12px;}
+.view.active {
+  transform: translateY(0);
+}
 
   /* Floating map actions */
   .map-actions{position:absolute;bottom:90px;right:20px;
