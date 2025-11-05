@@ -4,96 +4,125 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Light Up Norwin Parade Map</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
 <style>
-html,body {
-  height:100%; margin:0; overflow:hidden;
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;
-  background:#fff; color:#111;
+html,body{height:100%;margin:0;overflow:hidden;}
+#map{height:100%;width:100%;position:absolute;top:0;left:0;z-index:1;}
+:root{
+  --brand:#1756ff;
+  --bg:#fff;
+  --ink:#111;
+  --muted:#666;
+  --panel-bg:linear-gradient(180deg,#fff 0%,#f8f9fb 100%);
+  --map-filter:invert(0) hue-rotate(0deg);
 }
-#map {height:100%;width:100%;position:absolute;top:0;left:0;z-index:1;}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;
+  transition:background .3s,color .3s;
+}
 
-/* --- Top Nav --- */
-.top-nav {
-  position:fixed; top:0; left:0; width:100%; height:64px;
-  background:linear-gradient(180deg,#fff 0%,#f8f9fb 100%);
-  display:flex; justify-content:space-around; align-items:center;
+/* --- TOP NAV --- */
+.top-nav{
+  position:fixed;
+  top:0;left:0;width:100%;
+  height:70px;
+  background:var(--panel-bg);
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
   box-shadow:0 2px 8px rgba(0,0,0,0.15);
   border-bottom:1px solid #ddd;
   z-index:15;
+  transition:background .3s;
   padding-top:env(safe-area-inset-top,0);
 }
-.nav-item {
-  flex:1; text-align:center; cursor:pointer; font-weight:600;
-  color:#555; transition:color .3s;
+.nav-item{
+  flex:1;
+  text-align:center;
+  cursor:pointer;
+  font-weight:600;
+  color:#555;
+  transition:color .3s;
 }
-.nav-item span {display:block;font-size:22px;margin-bottom:2px;}
-.nav-item.active {color:#1756ff;}
+.nav-item span{display:block;font-size:22px;margin-bottom:2px;}
+.nav-item.active{color:var(--brand);}
 
-/* Floating map button */
-.map-actions {
-  position:absolute; top:90px; right:20px;
-  display:flex; flex-direction:column; gap:8px; z-index:9;
+/* Floating buttons */
+.map-actions{
+  position:absolute;top:90px;right:20px;
+  display:flex;flex-direction:column;gap:8px;z-index:9;
 }
-.map-actions button {
-  background:#fff; border:none; border-radius:50%;
-  width:46px; height:46px; font-size:22px;
-  cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.3);
-  transition:transform .15s ease;
+.map-actions button{
+  background:#fff;border:none;border-radius:50%;width:46px;height:46px;
+  font-size:22px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.3);
+  transition:transform .15s ease,background .3s,color .3s;
 }
-.map-actions button:active {transform:scale(0.95);}
+.map-actions button:active{transform:scale(0.95);}
 
-/* Slide-up card */
-.view {
-  position:fixed; left:50%; bottom:0;
+/* Slide-up cards */
+.view{
+  position:fixed;
+  left:50%;
+  bottom:0;
   transform:translate(-50%,100%);
-  background:linear-gradient(180deg,#fff 0%,#f8f9fb 100%);
-  border-top-left-radius:16px; border-top-right-radius:16px;
+  width:92%;
+  max-width:640px;
+  background:var(--panel-bg);
+  border-top-left-radius:16px;border-top-right-radius:16px;
   box-shadow:0 -3px 15px rgba(0,0,0,0.25);
   padding:60px 20px calc(90px + env(safe-area-inset-bottom));
-  max-height:60vh;
-  width:90%; max-width:640px;
-  overflow-y:auto; -webkit-overflow-scrolling:touch;
-  transition:transform .4s ease;
-  z-index:20;
-  visibility:hidden; pointer-events:none;
+  max-height:70vh;
+  overflow-y:auto;
+  transition:transform .4s ease,background .3s;
+  z-index:10;
+  backdrop-filter:blur(8px);
+  pointer-events:none;
+  visibility:hidden;
 }
-.view.active {
+.view.active{
   transform:translate(-50%,0);
-  visibility:visible; pointer-events:auto;
+  pointer-events:auto;
+  visibility:visible;
+  z-index:20;
 }
 
 /* Close button */
-.close-btn {
+.close-btn{
   position:absolute;
-  top:12px; right:12px;
-  border:none; background:rgba(255,255,255,0.95);
-  color:#000; font-size:20px;
-  border-radius:50%; width:36px; height:36px;
-  cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.25);
-  z-index:25;
+  top:calc(env(safe-area-inset-top,0px) + 12px);
+  right:calc(env(safe-area-inset-right,0px) + 12px);
+  border:none;
+  background:rgba(255,255,255,0.9);
+  color:#000;
+  font-size:22px;
+  border-radius:50%;
+  width:40px;height:40px;
+  cursor:pointer;
+  box-shadow:0 2px 8px rgba(0,0,0,0.3);
+  z-index:30;
 }
-.close-btn:active {transform:scale(0.95);}
+.close-btn:active{transform:scale(0.95);}
 
 /* Card content */
-.card {background:transparent;}
-.row {padding:8px 0; border-top:1px solid rgba(0,0,0,0.1);}
-.btn {
-  background:#1756ff; color:#fff;
-  padding:6px 10px; border:none;
-  border-radius:8px; cursor:pointer; font-weight:600;
-}
-.btn:active {transform:scale(0.97);}
+.card{background:transparent;}
+.row{padding:8px 0;border-top:1px solid rgba(0,0,0,0.1);transition:opacity .5s,color .5s;}
+.btn{background:var(--brand);color:#fff;padding:6px 10px;border:none;border-radius:8px;cursor:pointer;font-weight:600;}
+.btn:active{transform:scale(0.97);}
+.active-now{color:var(--brand);font-weight:700;}
+.faded{color:#bbb;opacity:0.6;}
 
-/* Overlay */
-.overlay {
-  position:fixed; top:0; left:0; width:100%; height:100%;
+/* Dim overlay */
+.overlay{
+  position:fixed;
+  top:0;left:0;width:100%;height:100%;
   background:rgba(0,0,0,0.25);
-  opacity:0; visibility:hidden;
+  opacity:0;visibility:hidden;
   transition:opacity .3s;
   z-index:5;
 }
-.overlay.active {opacity:1; visibility:visible;}
+.overlay.active{opacity:1;visibility:visible;}
 </style>
 </head>
 
@@ -109,10 +138,10 @@ html,body {
 <div id="view-schedule" class="view">
   <button class="close-btn" onclick="hidePanels()">✕</button>
   <h1>📅 Schedule</h1>
-  <div class="card">
-    <div class="row" id="stage"><strong>4:00 PM</strong> – Main Street Stage — Norwin Jazz Ensemble</div>
-    <div class="row" id="tree"><strong>5:45 PM</strong> – S&T Bank Plaza — Tree Lighting</div>
-    <div class="row" id="parade"><strong>6:15 PM</strong> – Parade Step-Off — 3rd & Main</div>
+  <div class="card" id="scheduleList">
+    <div class="row" data-time="2025-11-20T16:00:00-05:00" id="stage"><strong>4:00 PM</strong> – Main Street Stage — Norwin Jazz Ensemble</div>
+    <div class="row" data-time="2025-11-20T17:45:00-05:00" id="tree"><strong>5:45 PM</strong> – S&T Bank Plaza — Tree Lighting Ceremony</div>
+    <div class="row" data-time="2025-11-20T18:15:00-05:00" id="parade"><strong>6:15 PM</strong> – Parade Step-Off — 3rd & Main</div>
   </div>
 </div>
 
@@ -143,10 +172,9 @@ html,body {
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
-/* Map setup */
+/* --- Map --- */
 const map=L.map('map',{zoomControl:true}).setView([40.332,-79.7105],18);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:20}).addTo(map);
-
 const colors={Restrooms:"#007aff",Events:"#ff3b30",Food:"#34c759",Shopping:"#af52de"};
 function makeIcon(emoji,color){
   const svg=encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'><circle cx='20' cy='20' r='18' fill='${color}'/><text x='50%' y='55%' font-size='18' text-anchor='middle' fill='white'>${emoji}</text></svg>`);
@@ -188,7 +216,6 @@ const navItems=document.querySelectorAll('.nav-item');
 const panels=document.querySelectorAll('.view');
 const overlay=document.getElementById('overlay');
 let current=null;
-
 function hidePanels(){
   panels.forEach(v=>v.classList.remove('active'));
   navItems.forEach(n=>n.classList.remove('active'));
@@ -206,6 +233,40 @@ function togglePanel(view){
 overlay.onclick=hidePanels;
 map.on('click',hidePanels);
 navItems.forEach(i=>i.addEventListener('click',()=>togglePanel(i.dataset.view)));
+
+/* --- Smart schedule (fade then hide) --- */
+function updateSchedule(){
+  const now=new Date();
+  const rows=document.querySelectorAll('#scheduleList .row');
+  let nextUpcoming=null,soonestFuture=Infinity;
+
+  rows.forEach(r=>{
+    const eventTime=new Date(r.dataset.time);
+    const diff=(eventTime-now)/60000; // minutes from now
+
+    // Hide if wrong date entirely
+    if(eventTime.toDateString()!==now.toDateString()){
+      r.style.display="none";
+      return;
+    }
+
+    if(diff<-15){ // >15 min past = hide
+      r.style.display="none";
+    } else if(diff<0){ // past but within 15min = faded
+      r.classList.add('faded');
+      r.classList.remove('active-now');
+    } else { // upcoming
+      r.classList.remove('faded');
+      r.style.display="block";
+      if(diff<soonestFuture){soonestFuture=diff;nextUpcoming=r;}
+    }
+  });
+
+  rows.forEach(r=>r.classList.remove('active-now'));
+  if(nextUpcoming) nextUpcoming.classList.add('active-now');
+}
+updateSchedule();
+setInterval(updateSchedule,60000);
 </script>
 </body>
 </html>
