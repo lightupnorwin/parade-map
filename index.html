@@ -57,17 +57,26 @@
       line-height: 1.4;
     }
 
-    /* Route line glow */
-    @keyframes dash {
-      to { stroke-dashoffset: -1000; }
-    }
-    .glow-line {
-      stroke-dasharray: 10 6;
-      stroke-linecap: round;
-      animation: dash 20s linear infinite;
-    }
+    /* Quick Guide styling */
+    :root { --brand:#1756ff; --ink:#111; --muted:#666; --bg:#fff; --card:#f7f7fb; }
+    html,body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;}
+    .wrap{max-width:780px;margin:0 auto;padding:16px 14px 28px;}
+    header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:6px 0 14px}
+    h1{font-size:20px;margin:0}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0 18px}
+    .btn{display:flex;align-items:center;justify-content:center;gap:.5rem;border-radius:12px;padding:14px 12px;background:#fff;border:2px solid #eee;box-shadow:0 1px 6px rgba(0,0,0,.06);font-weight:700;text-decoration:none;color:var(--ink);text-align:center}
+    .btn:active{transform:scale(.98)}
+    .btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+    .card{background:var(--card);border-radius:14px;padding:12px 14px;margin-top:12px}
+    .card h2{font-size:16px;margin:0 0 8px}
+    .row{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:8px 0;border-top:1px solid #e8e8ef}
+    .row:first-child{border-top:0}
+    .time{font-weight:700;min-width:84px}
+    .muted{color:var(--muted)}
+    footer{margin-top:18px;font-size:12px;color:var(--muted);text-align:center}
   </style>
 </head>
+
 <body>
   <div id="map"></div>
 
@@ -78,11 +87,51 @@
     <button class="filter-btn Shopping" data-category="Shopping">Shopping</button>
   </div>
 
+  <div class="wrap">
+    <header>
+      <h1>🎄 Light Up Norwin — Quick Guide</h1>
+      <a class="btn primary" href="#map">Scroll to Map</a>
+    </header>
+
+    <div class="grid">
+      <a class="btn" href="#schedule">📅 Schedule</a>
+      <a class="btn" href="#restrooms">🚻 Restrooms</a>
+      <a class="btn" href="#food">🍔 Food & Shopping</a>
+    </div>
+
+    <!-- Schedule -->
+    <section id="schedule" class="card">
+      <h2>Today’s Schedule</h2>
+      <div class="row"><div class="time">4:00 PM</div><div>Main Street Stage — Norwin Jazz Ensemble</div></div>
+      <div class="row"><div class="time">5:45 PM</div><div>S&T Bank Plaza — Tree Lighting Ceremony</div></div>
+      <div class="row"><div class="time">6:15 PM</div><div>Parade Step-Off — 3rd St & Main</div></div>
+      <div class="muted" style="margin-top:6px">Times subject to change. See map for live updates.</div>
+    </section>
+
+    <!-- Restrooms -->
+    <section id="restrooms" class="card">
+      <h2>Restrooms</h2>
+      <div class="row"><div>415 Main St (Public)</div><a href="https://maps.apple.com/?q=415%20Main%20St%20Irwin%20PA" class="btn">Open in Maps</a></div>
+      <div class="row"><div>Portable Units — Near S&T Bank Plaza</div><a href="https://maps.apple.com/?ll=40.332795,-79.710338" class="btn">Open in Maps</a></div>
+    </section>
+
+    <!-- Food & Shopping -->
+    <section id="food" class="card">
+      <h2>Food & Shopping</h2>
+      <div class="muted" style="margin-bottom:6px">Vendors line Main St near the stage and plaza.</div>
+      <a class="btn" href="#map">Show on Map</a>
+    </section>
+
+    <footer>
+      Problems or lost child? See the info table near S&T Bank Plaza.
+    </footer>
+  </div>
+
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
     const map = L.map('map', { zoomControl: true }).setView([40.332, -79.7105], 18);
 
-    // --- Base tiles ---
+    // Base tiles
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 20,
       attribution: '&copy; OpenStreetMap contributors'
@@ -90,12 +139,11 @@
 
     const colors = {
       Restrooms: "#007aff",
-      Events:    "#ff3b30",
-      Food:      "#34c759",
-      Shopping:  "#af52de"
+      Events: "#ff3b30",
+      Food: "#34c759",
+      Shopping: "#af52de"
     };
 
-    // --- Icon builder (emoji SVGs) ---
     function makeIcon(emoji, color) {
       const svg = encodeURIComponent(`
         <svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'>
@@ -113,71 +161,38 @@
 
     const icons = {
       Restrooms: makeIcon("🚻", colors.Restrooms),
-      Events:    makeIcon("🎄", colors.Events),
-      Food:      makeIcon("🍔", colors.Food),
-      Shopping:  makeIcon("🛍️", colors.Shopping)
+      Events: makeIcon("🎄", colors.Events),
+      Food: makeIcon("🍔", colors.Food),
+      Shopping: makeIcon("🛍️", colors.Shopping)
     };
 
-    // --- Locations ---
     const locations = [
       { position: [40.3314911, -79.710878], name: "Restrooms", description: "Public restrooms at 415 Main St.", category: "Restrooms" },
       { position: [40.332795, -79.710338], name: "Tree Lighting", description: "At S&T Bank. Ceremony starts at 6 PM.", category: "Events" },
       { position: [40.332008, -79.711068], name: "Main Street Stage", description: "<strong>Schedule</strong><br>4:00 PM – Band<br>6:00 PM – Band", category: "Events" },
-      { position: [40.331993, -79.710851], name: "Pretend Food Vendor", description: "Serving warm treats all evening.", category: "Food" },
-      { position: [40.332086, -79.710864], name: "Pretend Craft Vendor", description: "Handmade gifts and holiday crafts.", category: "Shopping" }
+      { position: [40.331993, -79.710851], name: "Food Vendor", description: "Serving warm treats all evening.", category: "Food" },
+      { position: [40.332086, -79.710864], name: "Craft Vendor", description: "Handmade gifts and holiday crafts.", category: "Shopping" }
     ];
 
     const markers = [];
-    function addMarker(loc) {
-      const marker = L.marker(loc.position, { icon: icons[loc.category] })
-        .bindPopup(`<div class="popup"><h3>${loc.name}</h3><p>${loc.description}</p></div>`);
-      marker.category = loc.category;
-      marker.addTo(map);
-      markers.push(marker);
-    }
-    locations.forEach(addMarker);
-
-    // --- Auto fit to all markers ---
-    const group = L.featureGroup(markers);
-    map.fitBounds(group.getBounds(), { padding: [40, 40] });
-
-    // --- Parade route (accurate path: 3rd → Main → Pennsylvania) ---
-    const routeCoords = [
-      [40.33272, -79.71247],  // 3rd St & Main
-      [40.33235, -79.71137],  // midway down Main
-      [40.33189, -79.71037],  // 2nd St area
-      [40.33142, -79.70963]   // Pennsylvania Ave & Main
-    ];
-    L.polyline(routeCoords, {
-      color: "#FFD700",
-      weight: 6,
-      opacity: 0.9,
-      className: "glow-line"
-    }).addTo(map);
-
-    // --- Filter functionality ---
-    const buttons = document.querySelectorAll('.filter-btn');
-    buttons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        btn.classList.toggle('inactive');
-        updateMarkers();
-      });
+    locations.forEach(loc => {
+      const m = L.marker(loc.position, { icon: icons[loc.category] })
+        .bindPopup(`<div class="popup"><h3>${loc.name}</h3><p>${loc.description}</p></div>`)
+        .addTo(map);
+      m.category = loc.category;
+      markers.push(m);
     });
 
+    const buttons = document.querySelectorAll('.filter-btn');
     function updateMarkers() {
-      const active = new Set(
-        Array.from(buttons)
-          .filter(b => !b.classList.contains('inactive'))
-          .map(b => b.dataset.category)
-      );
-      markers.forEach(m => {
-        if (active.has(m.category)) {
-          m.addTo(map);
-        } else {
-          map.removeLayer(m);
-        }
-      });
+      const active = new Set([...buttons].filter(b => !b.classList.contains('inactive')).map(b => b.dataset.category));
+      markers.forEach(m => active.has(m.category) ? m.addTo(map) : map.removeLayer(m));
     }
+    buttons.forEach(btn => btn.addEventListener('click', () => { btn.classList.toggle('inactive'); updateMarkers(); }));
+
+    // Auto-fit markers
+    const group = L.featureGroup(markers);
+    map.fitBounds(group.getBounds(), { padding: [40, 40] });
   </script>
 </body>
 </html>
