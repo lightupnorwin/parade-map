@@ -9,7 +9,7 @@
     html, body { height: 100%; margin: 0; }
     #map { height: 100%; width: 100%; }
 
-    /* Disney-style segmented filter bar */
+    /* Filter bar */
     .filter-bar {
       position: absolute;
       top: 10px;
@@ -20,8 +20,10 @@
       padding: 6px 10px;
       background: #fff;
       border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.25);
       z-index: 1000;
+      flex-wrap: wrap;
+      justify-content: center;
     }
     .filter-btn {
       border-radius: 999px;
@@ -33,36 +35,36 @@
       border: 2px solid transparent;
       color: #fff;
     }
-    .filter-btn.Restrooms {
-      background: #007aff;
-      border-color: #007aff;
-    }
-    .filter-btn.Events {
-      background: #ff3b30;
-      border-color: #ff3b30;
-    }
-    .filter-btn.Food {
-      background: #34c759;
-      border-color: #34c759;
-    }
-    .filter-btn.Shopping {
-      background: #af52de;
-      border-color: #af52de;
-    }
-    .filter-btn.inactive {
-      background: #fff !important;
-      color: inherit !important;
-    }
+    .filter-btn.Restrooms { background: #007aff; border-color: #007aff; }
+    .filter-btn.Events    { background: #ff3b30; border-color: #ff3b30; }
+    .filter-btn.Food      { background: #34c759; border-color: #34c759; }
+    .filter-btn.Shopping  { background: #af52de; border-color: #af52de; }
+    .filter-btn.inactive  { background: #fff !important; color: #333 !important; }
 
     /* Popup styling */
+    .leaflet-popup-content-wrapper {
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
     .popup h3 {
       margin: 0 0 4px;
       font-size: 16px;
+      color: #222;
     }
     .popup p {
       margin: 0;
       font-size: 14px;
-      line-height: 1.3;
+      line-height: 1.4;
+    }
+
+    /* Route line glow */
+    @keyframes dash {
+      to { stroke-dashoffset: -1000; }
+    }
+    .glow-line {
+      stroke-dasharray: 10 6;
+      stroke-linecap: round;
+      animation: dash 20s linear infinite;
     }
   </style>
 </head>
@@ -78,9 +80,9 @@
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    const map = L.map('map', { zoomControl: true })
-      .setView([40.332, -79.7105], 18);
+    const map = L.map('map', { zoomControl: true }).setView([40.332, -79.7105], 18);
 
+    // --- Base tiles ---
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 20,
       attribution: '&copy; OpenStreetMap contributors'
@@ -93,6 +95,30 @@
       Shopping:  "#af52de"
     };
 
+    // --- Icon builder (using emojis as fallback) ---
+    function makeIcon(emoji, color) {
+      const svg = encodeURIComponent(`
+        <svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'>
+          <circle cx='20' cy='20' r='18' fill='${color}' />
+          <text x='50%' y='55%' font-size='18' text-anchor='middle' fill='white'>${emoji}</text>
+        </svg>
+      `);
+      return L.icon({
+        iconUrl: "data:image/svg+xml," + svg,
+        iconSize: [30, 30],
+        iconAnchor: [15, 30],
+        popupAnchor: [0, -28]
+      });
+    }
+
+    const icons = {
+      Restrooms: makeIcon("🚻", colors.Restrooms),
+      Events:    makeIcon("🎄", colors.Events),
+      Food:      makeIcon("🍔", colors.Food),
+      Shopping:  makeIcon("🛍️", colors.Shopping)
+    };
+
+    // --- Locations ---
     const locations = [
       { position: [40.3314911, -79.710878], name: "Restrooms", description: "Public restrooms at 415 Main St.", category: "Restrooms" },
       { position: [40.332795, -79.710338], name: "Tree Lighting", description: "At S&T Bank. Ceremony starts at 6 PM.", category: "Events" },
@@ -103,20 +129,32 @@
 
     const markers = [];
     function addMarker(loc) {
-      const marker = L.circleMarker(loc.position, {
-        radius: 9,
-        weight: 2,
-        color: colors[loc.category],
-        fillColor: colors[loc.category],
-        fillOpacity: 0.85
-      }).bindPopup(`<div class="popup"><h3>${loc.name}</h3><p>${loc.description}</p></div>`);
-
+      const marker = L.marker(loc.position, { icon: icons[loc.category] })
+        .bindPopup(`<div class="popup"><h3>${loc.name}</h3><p>${loc.description}</p></div>`);
       marker.category = loc.category;
       marker.addTo(map);
       markers.push(marker);
     }
     locations.forEach(addMarker);
 
+    // --- Auto fit to all markers ---
+    const group = L.featureGroup(markers);
+    map.fitBounds(group.getBounds(), { padding: [40, 40] });
+
+    // --- Parade route (placeholder polyline) ---
+    const routeCoords = [
+      [40.3313, -79.7115],
+      [40.3321, -79.7105],
+      [40.3330, -79.7097]
+    ];
+    const route = L.polyline(routeCoords, {
+      color: "#FFD700",
+      weight: 6,
+      opacity: 0.9,
+      className: "glow-line"
+    }).addTo(map);
+
+    // --- Filter functionality ---
     const buttons = document.querySelectorAll('.filter-btn');
     buttons.forEach(btn => {
       btn.addEventListener('click', () => {
