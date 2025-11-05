@@ -282,15 +282,26 @@ panels.forEach(v=>{
 });
 
 function hidePanels(){
-  panels.forEach(v=>v.classList.remove('active'));
+  panels.forEach(v=>{
+    v.classList.remove('active');
+    v.style.transform='translateY(100%)';
+    v.style.visibility='hidden';
+    v.style.pointerEvents='none';
+    v.style.opacity='0';
+  });
   navItems.forEach(n=>n.classList.remove('active'));
   current=null;
 }
+
 function togglePanel(view){
   if(current===view){hidePanels();return;}
   hidePanels();
   const panel=document.getElementById('view-'+view);
   panel.classList.add('active');
+  panel.style.visibility='visible';
+  panel.style.pointerEvents='auto';
+  panel.style.opacity='1';
+  panel.style.transform='translateY(0)';
   document.querySelector(`.nav-item[data-view="${view}"]`).classList.add('active');
   current=view;
 }
