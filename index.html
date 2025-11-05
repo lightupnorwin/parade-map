@@ -1,198 +1,203 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Light Up Norwin Parade Map</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  <style>
-    html, body { height: 100%; margin: 0; }
-    #map { height: 100%; width: 100%; }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Light Up Norwin Parade Map</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<style>
+  html, body { height:100%; margin:0; }
+  #map { height:100%; width:100%; }
 
-    /* Filter bar */
-    .filter-bar {
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 10px;
-      padding: 6px 10px;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.25);
-      z-index: 1000;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    .filter-btn {
-      border-radius: 999px;
-      padding: 6px 12px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: .2s ease;
-      user-select: none;
-      border: 2px solid transparent;
-      color: #fff;
-    }
-    .filter-btn.Restrooms { background: #007aff; border-color: #007aff; }
-    .filter-btn.Events    { background: #ff3b30; border-color: #ff3b30; }
-    .filter-btn.Food      { background: #34c759; border-color: #34c759; }
-    .filter-btn.Shopping  { background: #af52de; border-color: #af52de; }
-    .filter-btn.inactive  { background: #fff !important; color: #333 !important; }
+  /* Filter bar */
+  .filter-bar {
+    position:absolute; top:10px; left:50%; transform:translateX(-50%);
+    display:flex; gap:10px; padding:6px 10px;
+    background:#fff; border-radius:12px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.25);
+    z-index:1000; flex-wrap:wrap; justify-content:center;
+  }
+  .filter-btn {
+    border-radius:999px; padding:6px 12px; font-weight:700;
+    cursor:pointer; transition:.2s ease; user-select:none;
+    border:2px solid transparent; color:#fff;
+  }
+  .filter-btn.Restrooms{background:#007aff;border-color:#007aff;}
+  .filter-btn.Events{background:#ff3b30;border-color:#ff3b30;}
+  .filter-btn.Food{background:#34c759;border-color:#34c759;}
+  .filter-btn.Shopping{background:#af52de;border-color:#af52de;}
+  .filter-btn.inactive{background:#fff!important;color:#333!important;}
 
-    /* Popup styling */
-    .leaflet-popup-content-wrapper {
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    }
-    .popup h3 {
-      margin: 0 0 4px;
-      font-size: 16px;
-      color: #222;
-    }
-    .popup p {
-      margin: 0;
-      font-size: 14px;
-      line-height: 1.4;
-    }
+  /* Popups */
+  .leaflet-popup-content-wrapper{border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,0.3);}
+  .popup h3{margin:0 0 4px;font-size:16px;color:#222;}
+  .popup p{margin:0;font-size:14px;line-height:1.4;}
 
-    /* Quick Guide styling */
-    :root { --brand:#1756ff; --ink:#111; --muted:#666; --bg:#fff; --card:#f7f7fb; }
-    html,body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;}
-    .wrap{max-width:780px;margin:0 auto;padding:16px 14px 28px;}
-    header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:6px 0 14px}
-    h1{font-size:20px;margin:0}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0 18px}
-    .btn{display:flex;align-items:center;justify-content:center;gap:.5rem;border-radius:12px;padding:14px 12px;background:#fff;border:2px solid #eee;box-shadow:0 1px 6px rgba(0,0,0,.06);font-weight:700;text-decoration:none;color:var(--ink);text-align:center}
-    .btn:active{transform:scale(.98)}
-    .btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
-    .card{background:var(--card);border-radius:14px;padding:12px 14px;margin-top:12px}
-    .card h2{font-size:16px;margin:0 0 8px}
-    .row{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:8px 0;border-top:1px solid #e8e8ef}
-    .row:first-child{border-top:0}
-    .time{font-weight:700;min-width:84px}
-    .muted{color:var(--muted)}
-    footer{margin-top:18px;font-size:12px;color:var(--muted);text-align:center}
-  </style>
+  /* Quick guide */
+  :root{--brand:#1756ff;--ink:#111;--muted:#666;--bg:#fff;--card:#f7f7fb;}
+  html,body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;}
+  .wrap{max-width:780px;margin:0 auto;padding:16px 14px 28px;}
+  header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:6px 0 14px;}
+  h1{font-size:20px;margin:0;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0 18px;}
+  .btn{
+    display:flex;align-items:center;justify-content:center;gap:.5rem;
+    border-radius:16px;padding:14px 12px;
+    background:linear-gradient(180deg,#fff 0%,#f4f5f7 100%);
+    border:2px solid #eee;box-shadow:0 2px 8px rgba(0,0,0,.05);
+    font-weight:700;text-decoration:none;color:var(--ink);text-align:center;
+    transition:transform .15s ease,box-shadow .15s ease;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(0,0,0,.1);}
+  .btn.primary{background:linear-gradient(180deg,#007bff 0%,#005fdd 100%);border-color:#005fdd;color:#fff;}
+  .card{
+    background:linear-gradient(180deg,#fff 0%,#f8f9fb 100%);
+    border-radius:16px;padding:12px 14px;margin-top:12px;
+    box-shadow:0 3px 8px rgba(0,0,0,0.05);
+    opacity:0;transform:translateY(10px);
+    animation:fadeUp .6s forwards;
+  }
+  @keyframes fadeUp{to{opacity:1;transform:translateY(0);}}
+  .card h2{font-size:16px;margin:0 0 8px;}
+  .row{display:flex;justify-content:space-between;gap:8px;align-items:center;
+       padding:8px 0;border-top:1px solid #e8e8ef;}
+  .row:first-child{border-top:0;}
+  .time{font-weight:700;min-width:84px;}
+  .muted{color:var(--muted);}
+  footer{margin-top:18px;font-size:12px;color:var(--muted);text-align:center;}
+
+  /* Now happening highlight */
+  .active-now{box-shadow:0 0 10px 2px var(--brand);border-radius:12px;transition:box-shadow .4s ease;}
+
+  /* Floating map actions */
+  .map-actions{
+    position:absolute;bottom:20px;right:20px;
+    display:flex;flex-direction:column;gap:10px;z-index:1000;
+  }
+  .map-actions button{
+    background:#fff;border:none;border-radius:50%;width:46px;height:46px;
+    font-size:22px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.3);
+    transition:transform .15s ease;
+  }
+  .map-actions button:active{transform:scale(0.95);}
+</style>
 </head>
 
 <body>
-  <div id="map"></div>
+<div id="map"></div>
 
-  <div class="filter-bar">
-    <button class="filter-btn Restrooms" data-category="Restrooms">Restrooms</button>
-    <button class="filter-btn Events" data-category="Events">Events</button>
-    <button class="filter-btn Food" data-category="Food">Food &amp; Beverage</button>
-    <button class="filter-btn Shopping" data-category="Shopping">Shopping</button>
+<div class="filter-bar">
+  <button class="filter-btn Restrooms" data-category="Restrooms">Restrooms</button>
+  <button class="filter-btn Events" data-category="Events">Events</button>
+  <button class="filter-btn Food" data-category="Food">Food &amp; Beverage</button>
+  <button class="filter-btn Shopping" data-category="Shopping">Shopping</button>
+</div>
+
+<div class="map-actions">
+  <button id="locateMe">📍</button>
+  <button id="resetView">🔄</button>
+</div>
+
+<div class="wrap">
+  <header>
+    <h1>🎄 Light Up Norwin — Quick Guide</h1>
+    <a class="btn primary" href="#map">Scroll to Map</a>
+  </header>
+
+  <div class="grid">
+    <a class="btn" href="#schedule">📅 Schedule</a>
+    <a class="btn" href="#restrooms">🚻 Restrooms</a>
+    <a class="btn" href="#food">🍔 Food & Shopping</a>
   </div>
 
-  <div class="wrap">
-    <header>
-      <h1>🎄 Light Up Norwin — Quick Guide</h1>
-      <a class="btn primary" href="#map">Scroll to Map</a>
-    </header>
+  <section id="schedule" class="card">
+    <h2>Today’s Schedule</h2>
+    <div class="row" id="stage"><div class="time">4:00 PM</div><div>Main Street Stage — Norwin Jazz Ensemble</div></div>
+    <div class="row" id="tree"><div class="time">5:45 PM</div><div>S&T Bank Plaza — Tree Lighting Ceremony</div></div>
+    <div class="row" id="parade"><div class="time">6:15 PM</div><div>Parade Step-Off — 3rd St & Main</div></div>
+    <div class="muted" style="margin-top:6px">Times subject to change.</div>
+  </section>
 
-    <div class="grid">
-      <a class="btn" href="#schedule">📅 Schedule</a>
-      <a class="btn" href="#restrooms">🚻 Restrooms</a>
-      <a class="btn" href="#food">🍔 Food & Shopping</a>
-    </div>
+  <section id="restrooms" class="card">
+    <h2>Restrooms</h2>
+    <div class="row"><div>415 Main St (Public)</div><a href="https://maps.apple.com/?q=415%20Main%20St%20Irwin%20PA" class="btn">Open in Maps</a></div>
+    <div class="row"><div>Portable Units — Near S&T Bank Plaza</div><a href="https://maps.apple.com/?ll=40.332795,-79.710338" class="btn">Open in Maps</a></div>
+  </section>
 
-    <!-- Schedule -->
-    <section id="schedule" class="card">
-      <h2>Today’s Schedule</h2>
-      <div class="row"><div class="time">4:00 PM</div><div>Main Street Stage — Norwin Jazz Ensemble</div></div>
-      <div class="row"><div class="time">5:45 PM</div><div>S&T Bank Plaza — Tree Lighting Ceremony</div></div>
-      <div class="row"><div class="time">6:15 PM</div><div>Parade Step-Off — 3rd St & Main</div></div>
-      <div class="muted" style="margin-top:6px">Times subject to change. See map for live updates.</div>
-    </section>
+  <section id="food" class="card">
+    <h2>Food & Shopping</h2>
+    <div class="muted" style="margin-bottom:6px">Vendors line Main St near the stage and plaza.</div>
+    <a class="btn" href="#map">Show on Map</a>
+  </section>
 
-    <!-- Restrooms -->
-    <section id="restrooms" class="card">
-      <h2>Restrooms</h2>
-      <div class="row"><div>415 Main St (Public)</div><a href="https://maps.apple.com/?q=415%20Main%20St%20Irwin%20PA" class="btn">Open in Maps</a></div>
-      <div class="row"><div>Portable Units — Near S&T Bank Plaza</div><a href="https://maps.apple.com/?ll=40.332795,-79.710338" class="btn">Open in Maps</a></div>
-    </section>
+  <footer>Problems or lost child? See the info table near S&T Bank Plaza.</footer>
+</div>
 
-    <!-- Food & Shopping -->
-    <section id="food" class="card">
-      <h2>Food & Shopping</h2>
-      <div class="muted" style="margin-bottom:6px">Vendors line Main St near the stage and plaza.</div>
-      <a class="btn" href="#map">Show on Map</a>
-    </section>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+const map=L.map('map',{zoomControl:true}).setView([40.332,-79.7105],18);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:20,attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
 
-    <footer>
-      Problems or lost child? See the info table near S&T Bank Plaza.
-    </footer>
-  </div>
+const colors={Restrooms:"#007aff",Events:"#ff3b30",Food:"#34c759",Shopping:"#af52de"};
+function makeIcon(emoji,color){
+  const svg=encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'><circle cx='20' cy='20' r='18' fill='${color}'/><text x='50%' y='55%' font-size='18' text-anchor='middle' fill='white'>${emoji}</text></svg>`);
+  return L.icon({iconUrl:"data:image/svg+xml,"+svg,iconSize:[30,30],iconAnchor:[15,30],popupAnchor:[0,-28]});
+}
+const icons={Restrooms:makeIcon("🚻",colors.Restrooms),Events:makeIcon("🎄",colors.Events),Food:makeIcon("🍔",colors.Food),Shopping:makeIcon("🛍️",colors.Shopping)};
+const locations=[
+  {position:[40.3314911,-79.710878],name:"Restrooms",description:"Public restrooms at 415 Main St.",category:"Restrooms"},
+  {position:[40.332795,-79.710338],name:"Tree Lighting",description:"At S&T Bank. Ceremony starts at 6 PM.",category:"Events"},
+  {position:[40.332008,-79.711068],name:"Main Street Stage",description:"<strong>Schedule</strong><br>4:00 PM – Band<br>6:00 PM – Band",category:"Events"},
+  {position:[40.331993,-79.710851],name:"Food Vendor",description:"Serving warm treats all evening.",category:"Food"},
+  {position:[40.332086,-79.710864],name:"Craft Vendor",description:"Handmade gifts and holiday crafts.",category:"Shopping"}
+];
 
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <script>
-    const map = L.map('map', { zoomControl: true }).setView([40.332, -79.7105], 18);
+const markers=[];
+locations.forEach(loc=>{
+  const m=L.marker(loc.position,{icon:icons[loc.category]})
+   .bindPopup(`<div class="popup"><h3>${loc.name}</h3><p>${loc.description}</p></div>`).addTo(map);
+  m.category=loc.category;markers.push(m);
+});
 
-    // Base tiles
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 20,
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
+const buttons=document.querySelectorAll('.filter-btn');
+function updateMarkers(){
+  const active=new Set([...buttons].filter(b=>!b.classList.contains('inactive')).map(b=>b.dataset.category));
+  markers.forEach(m=>active.has(m.category)?m.addTo(map):map.removeLayer(m));
+}
+buttons.forEach(btn=>btn.addEventListener('click',()=>{btn.classList.toggle('inactive');updateMarkers();}));
 
-    const colors = {
-      Restrooms: "#007aff",
-      Events: "#ff3b30",
-      Food: "#34c759",
-      Shopping: "#af52de"
-    };
+// Auto-fit
+const group=L.featureGroup(markers);map.fitBounds(group.getBounds(),{padding:[40,40]});
 
-    function makeIcon(emoji, color) {
-      const svg = encodeURIComponent(`
-        <svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'>
-          <circle cx='20' cy='20' r='18' fill='${color}' />
-          <text x='50%' y='55%' font-size='18' text-anchor='middle' fill='white'>${emoji}</text>
-        </svg>
-      `);
-      return L.icon({
-        iconUrl: "data:image/svg+xml," + svg,
-        iconSize: [30, 30],
-        iconAnchor: [15, 30],
-        popupAnchor: [0, -28]
-      });
-    }
+// Floating actions
+document.getElementById("locateMe").onclick=()=>{
+  navigator.geolocation?.getCurrentPosition(pos=>{
+    const{latitude,longitude}=pos.coords;
+    map.setView([latitude,longitude],18);
+    L.circleMarker([latitude,longitude],{radius:8,color:"#1756ff",fillOpacity:0.9}).addTo(map)
+      .bindPopup("You are here").openPopup();
+  });
+};
+document.getElementById("resetView").onclick=()=>map.fitBounds(group.getBounds(),{padding:[40,40]});
 
-    const icons = {
-      Restrooms: makeIcon("🚻", colors.Restrooms),
-      Events: makeIcon("🎄", colors.Events),
-      Food: makeIcon("🍔", colors.Food),
-      Shopping: makeIcon("🛍️", colors.Shopping)
-    };
-
-    const locations = [
-      { position: [40.3314911, -79.710878], name: "Restrooms", description: "Public restrooms at 415 Main St.", category: "Restrooms" },
-      { position: [40.332795, -79.710338], name: "Tree Lighting", description: "At S&T Bank. Ceremony starts at 6 PM.", category: "Events" },
-      { position: [40.332008, -79.711068], name: "Main Street Stage", description: "<strong>Schedule</strong><br>4:00 PM – Band<br>6:00 PM – Band", category: "Events" },
-      { position: [40.331993, -79.710851], name: "Food Vendor", description: "Serving warm treats all evening.", category: "Food" },
-      { position: [40.332086, -79.710864], name: "Craft Vendor", description: "Handmade gifts and holiday crafts.", category: "Shopping" }
-    ];
-
-    const markers = [];
-    locations.forEach(loc => {
-      const m = L.marker(loc.position, { icon: icons[loc.category] })
-        .bindPopup(`<div class="popup"><h3>${loc.name}</h3><p>${loc.description}</p></div>`)
-        .addTo(map);
-      m.category = loc.category;
-      markers.push(m);
-    });
-
-    const buttons = document.querySelectorAll('.filter-btn');
-    function updateMarkers() {
-      const active = new Set([...buttons].filter(b => !b.classList.contains('inactive')).map(b => b.dataset.category));
-      markers.forEach(m => active.has(m.category) ? m.addTo(map) : map.removeLayer(m));
-    }
-    buttons.forEach(btn => btn.addEventListener('click', () => { btn.classList.toggle('inactive'); updateMarkers(); }));
-
-    // Auto-fit markers
-    const group = L.featureGroup(markers);
-    map.fitBounds(group.getBounds(), { padding: [40, 40] });
-  </script>
+// “Now happening” highlight
+const schedule=[
+  {time:"16:00",id:"stage"},
+  {time:"17:45",id:"tree"},
+  {time:"18:15",id:"parade"}
+];
+function highlightNow(){
+  const now=new Date();const mins=now.getHours()*60+now.getMinutes();
+  schedule.forEach(s=>{
+    const[h,m]=s.time.split(":").map(Number);
+    const t=h*60+m;
+    const el=document.getElementById(s.id);
+    if(!el)return;
+    if(Math.abs(mins-t)<30)el.classList.add("active-now");
+    else el.classList.remove("active-now");
+  });
+}
+highlightNow();setInterval(highlightNow,60000);
+</script>
 </body>
 </html>
