@@ -35,7 +35,6 @@ body{
   box-shadow:0 2px 8px rgba(0,0,0,0.15);
   border-bottom:1px solid #ddd;
   z-index:15;
-  transition:background .3s;
   padding-top:env(safe-area-inset-top,0);
 }
 .nav-item{
@@ -139,9 +138,10 @@ body{
   <button class="close-btn" onclick="hidePanels()">✕</button>
   <h1>📅 Schedule</h1>
   <div class="card" id="scheduleList">
-    <div class="row" data-time="2025-11-20T16:00:00-05:00" id="stage"><strong>4:00 PM</strong> – Main Street Stage — Norwin Jazz Ensemble</div>
-    <div class="row" data-time="2025-11-20T17:45:00-05:00" id="tree"><strong>5:45 PM</strong> – S&T Bank Plaza — Tree Lighting Ceremony</div>
-    <div class="row" data-time="2025-11-20T18:15:00-05:00" id="parade"><strong>6:15 PM</strong> – Parade Step-Off — 3rd & Main</div>
+    <div class="row" data-time="2025-11-20T17:00:00-05:00"><strong>5:00 PM</strong> – East End Kids</div>
+    <div class="row" data-time="2025-11-20T17:30:00-05:00"><strong>5:30 PM</strong> – Main Street Music Students</div>
+    <div class="row" data-time="2025-11-20T18:00:00-05:00"><strong>6:00 PM</strong> – CP Music</div>
+    <div class="row" data-time="2025-11-20T18:30:00-05:00"><strong>6:30 PM</strong> – Parade Begins! <em>(Rick Sebak of WQED serves as MC)</em></div>
   </div>
 </div>
 
@@ -234,7 +234,7 @@ overlay.onclick=hidePanels;
 map.on('click',hidePanels);
 navItems.forEach(i=>i.addEventListener('click',()=>togglePanel(i.dataset.view)));
 
-/* --- Smart schedule (fade then hide) --- */
+/* --- Updated Schedule Behavior --- */
 function updateSchedule(){
   const now=new Date();
   const rows=document.querySelectorAll('#scheduleList .row');
@@ -242,24 +242,19 @@ function updateSchedule(){
 
   rows.forEach(r=>{
     const eventTime=new Date(r.dataset.time);
-    const diff=(eventTime-now)/60000; // minutes from now
+    const diff=(eventTime-now)/60000;
 
-    // Hide if wrong date entirely
-    if(eventTime.toDateString()!==now.toDateString()){
-      r.style.display="none";
+    // Always show before the event day
+    if(now<new Date("2025-11-20T00:00:00-05:00")) {
+      r.style.display="block";
+      r.classList.remove('faded','active-now');
       return;
     }
 
-    if(diff<-15){ // >15 min past = hide
-      r.style.display="none";
-    } else if(diff<0){ // past but within 15min = faded
-      r.classList.add('faded');
-      r.classList.remove('active-now');
-    } else { // upcoming
-      r.classList.remove('faded');
-      r.style.display="block";
-      if(diff<soonestFuture){soonestFuture=diff;nextUpcoming=r;}
-    }
+    // Fade and hide on Nov 20 as times pass
+    if(diff<-15){r.style.display="none";}
+    else if(diff<0){r.classList.add('faded');r.classList.remove('active-now');}
+    else {r.classList.remove('faded');r.style.display="block";if(diff<soonestFuture){soonestFuture=diff;nextUpcoming=r;}}
   });
 
   rows.forEach(r=>r.classList.remove('active-now'));
