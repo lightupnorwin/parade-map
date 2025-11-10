@@ -1,130 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Light Up Norwin Parade Map</title>
+
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css">
+
 <style>
-html,body{height:100%;margin:0;overflow:hidden;}
-#map{height:100%;width:100%;position:absolute;top:0;left:0;z-index:1;}
-:root{
-  --brand:#1756ff;
-  --bg:#fff;
-  --ink:#111;
-  --muted:#666;
-  --panel-bg:linear-gradient(180deg,#fff 0%,#f8f9fb 100%);
-  --map-filter:invert(0) hue-rotate(0deg);
-}
-body{
-  background:var(--bg);
-  color:var(--ink);
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;
-  transition:background .3s,color .3s;
-}
+  html,body{height:100%;margin:0;overflow:hidden;}
+  #map{height:100%;width:100%;position:absolute;top:0;left:0;z-index:1;}
+  :root{
+    --brand:#1756ff;
+    --bg:#fff;
+    --ink:#111;
+    --muted:#666;
+    --panel-bg:linear-gradient(180deg,#fff 0%,#f8f9fb 100%);
+  }
+  body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;}
 
-/* --- TOP NAV --- */
-.top-nav{
-  position:fixed;
-  top:0;left:0;width:100%;
-  height:70px;
-  background:var(--panel-bg);
-  display:flex;
-  justify-content:space-around;
-  align-items:center;
-  box-shadow:0 2px 8px rgba(0,0,0,0.15);
-  border-bottom:1px solid #ddd;
-  z-index:15;
-  padding-top:env(safe-area-inset-top,0);
-}
-.nav-item{
-  flex:1;
-  text-align:center;
-  cursor:pointer;
-  font-weight:600;
-  color:#555;
-  transition:color .3s;
-}
-.nav-item span{display:block;font-size:22px;margin-bottom:2px;}
-.nav-item.active{color:var(--brand);}
+  /* --- TOP NAV --- */
+  .top-nav{
+    position:fixed;top:0;left:0;width:100%;height:70px;
+    background:var(--panel-bg);
+    display:flex;justify-content:space-around;align-items:center;
+    box-shadow:0 2px 8px rgba(0,0,0,0.15);border-bottom:1px solid #ddd;
+    z-index:15;padding-top:env(safe-area-inset-top,0);
+  }
+  .nav-item{flex:1;text-align:center;cursor:pointer;font-weight:600;color:#555;transition:color .2s;}
+  .nav-item span{display:block;font-size:22px;margin-bottom:2px;}
+  .nav-item.active{color:var(--brand);}
 
-/* Floating buttons */
-.map-actions{
-  position:absolute;top:90px;right:20px;
-  display:flex;flex-direction:column;gap:8px;z-index:9;
-}
-.map-actions button{
-  background:#fff;border:none;border-radius:50%;width:46px;height:46px;
-  font-size:22px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.3);
-  transition:transform .15s ease,background .3s,color .3s;
-}
-.map-actions button:active{transform:scale(0.95);}
+  /* Floating buttons */
+  .map-actions{
+    position:absolute;top:90px;right:20px;
+    display:flex;flex-direction:column;gap:8px;z-index:12;
+  }
+  .map-actions button{
+    background:#fff;border:none;border-radius:50%;width:46px;height:46px;
+    font-size:22px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.3);
+    transition:transform .15s ease;
+  }
+  .map-actions button:active{transform:scale(0.95);}
 
-/* Slide-up cards */
-.view{
-  position:fixed;
-  left:50%;
-  bottom:0;
-  transform:translate(-50%,100%);
-  width:92%;
-  max-width:640px;
-  background:var(--panel-bg);
-  border-top-left-radius:16px;border-top-right-radius:16px;
-  box-shadow:0 -3px 15px rgba(0,0,0,0.25);
-  padding:60px 20px calc(90px + env(safe-area-inset-bottom));
-  max-height:70vh;
-  overflow-y:auto;
-  transition:transform .4s ease,background .3s;
-  z-index:10;
-  backdrop-filter:blur(8px);
-  pointer-events:none;
-  visibility:hidden;
-}
-.view.active{
-  transform:translate(-50%,0);
-  pointer-events:auto;
-  visibility:visible;
-  z-index:20;
-}
+  /* Cancel routing button */
+  .route-actions{
+    position:absolute;top:90px;left:20px;z-index:12;display:none;
+  }
+  .route-actions .cancel{
+    background:#fff;border:none;border-radius:999px;padding:10px 14px;
+    font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.3);cursor:pointer;
+  }
+  .route-actions.show{display:block;}
 
-/* Close button */
-.close-btn{
-  position:absolute;
-  top:calc(env(safe-area-inset-top,0px) + 12px);
-  right:calc(env(safe-area-inset-right,0px) + 12px);
-  border:none;
-  background:rgba(255,255,255,0.9);
-  color:#000;
-  font-size:22px;
-  border-radius:50%;
-  width:40px;height:40px;
-  cursor:pointer;
-  box-shadow:0 2px 8px rgba(0,0,0,0.3);
-  z-index:30;
-}
-.close-btn:active{transform:scale(0.95);}
+  /* Slide-up cards (centered, one at a time) */
+  .view{
+    position:fixed;left:50%;bottom:0;transform:translate(-50%,100%);
+    width:92%;max-width:640px;background:var(--panel-bg);
+    border-top-left-radius:16px;border-top-right-radius:16px;
+    box-shadow:0 -3px 15px rgba(0,0,0,0.25);
+    padding:60px 20px calc(90px + env(safe-area-inset-bottom));
+    max-height:70vh;overflow-y:auto;transition:transform .35s ease;
+    z-index:10;backdrop-filter:blur(8px);pointer-events:none;visibility:hidden;
+  }
+  .view.active{transform:translate(-50%,0);pointer-events:auto;visibility:visible;z-index:20;}
 
-/* Card content */
-.card{background:transparent;}
-.row{padding:8px 0;border-top:1px solid rgba(0,0,0,0.1);transition:opacity .5s,color .5s;}
-.btn{background:var(--brand);color:#fff;padding:6px 10px;border:none;border-radius:8px;cursor:pointer;font-weight:600;}
-.btn:active{transform:scale(0.97);}
-.active-now{color:var(--brand);font-weight:700;}
-.faded{color:#bbb;opacity:0.6;}
+  /* Close button */
+  .close-btn{
+    position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);right:calc(env(safe-area-inset-right,0px) + 12px);
+    border:none;background:rgba(255,255,255,0.9);color:#000;font-size:22px;border-radius:50%;
+    width:40px;height:40px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.3);z-index:30;
+  }
+  .close-btn:active{transform:scale(0.95);}
 
-/* Dim overlay */
-.overlay{
-  position:fixed;
-  top:0;left:0;width:100%;height:100%;
-  background:rgba(0,0,0,0.25);
-  opacity:0;visibility:hidden;
-  transition:opacity .3s;
-  z-index:5;
-}
-.overlay.active{opacity:1;visibility:visible;}
+  /* Card content */
+  .card{background:transparent;}
+  .row{padding:10px 0;border-top:1px solid rgba(0,0,0,0.1);display:flex;justify-content:space-between;gap:10px;align-items:center;}
+  .row:first-child{border-top:none;}
+  .btn{background:var(--brand);color:#fff;padding:6px 10px;border:none;border-radius:8px;cursor:pointer;font-weight:600;}
+  .btn:active{transform:scale(0.97);}
+  .btn.secondary{background:#e9ecf7;color:#122;}
+  .active-now{color:var(--brand);font-weight:700;}
+  .faded{color:#bbb;opacity:0.6;}
+  .badge{display:inline-block;background:#eef3ff;color:#245; font-weight:700;border-radius:999px;padding:2px 8px;margin-left:6px;font-size:12px;}
 
-/* Map dark filter for night mode */
-#map.leaflet-container.night {filter: invert(1) hue-rotate(180deg) brightness(0.8);}
+  /* Dim overlay */
+  .overlay{
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    background:rgba(0,0,0,0.25);opacity:0;visibility:hidden;transition:opacity .25s;z-index:5;
+  }
+  .overlay.active{opacity:1;visibility:visible;}
+
+  /* Search tray under nav */
+  .search-tray{
+    position:fixed;top:70px;left:0;width:100%;
+    background:#fff;border-bottom:1px solid #ddd;z-index:14;
+    transform:translateY(-110%);transition:transform .25s ease;
+    box-shadow:0 2px 10px rgba(0,0,0,0.1);
+  }
+  .search-tray.active{transform:translateY(0);}
+  .search-inner{padding:10px 12px 14px;}
+  .search-bar{display:flex;gap:8px;}
+  .search-input{flex:1;border:1px solid #ddd;border-radius:12px;padding:10px 12px;font-size:16px;outline:none;}
+  .search-results{max-height:50vh;overflow:auto;margin-top:8px;}
+  .result{padding:10px;border-top:1px solid #eee;}
+  .result-title{font-weight:700;}
+  .result-meta{color:#666;font-size:13px;margin:2px 0 6px;}
+  .result .btn{margin-right:6px;}
+
+  /* Hide LRM's default panel */
+  .leaflet-routing-container{display:none;}
 </style>
 </head>
 
@@ -132,8 +118,12 @@ body{
 <div id="map"></div>
 <div class="overlay" id="overlay"></div>
 
+<!-- Floating controls -->
 <div class="map-actions">
   <button id="locateMe" title="Use my location">📍</button>
+</div>
+<div class="route-actions" id="routeActions">
+  <button class="cancel" id="cancelRoute">Cancel Directions</button>
 </div>
 
 <!-- Panels -->
@@ -141,19 +131,31 @@ body{
   <button class="close-btn" onclick="hidePanels()">✕</button>
   <h1>📅 Schedule</h1>
   <div class="card" id="scheduleList">
-    <div class="row" data-time="2025-11-20T17:00:00-05:00"><strong>5:00 PM</strong> – East End Kids</div>
-    <div class="row" data-time="2025-11-20T17:30:00-05:00"><strong>5:30 PM</strong> – Main Street Music Students</div>
-    <div class="row" data-time="2025-11-20T18:00:00-05:00"><strong>6:00 PM</strong> – CP Music</div>
-    <div class="row" data-time="2025-11-20T18:30:00-05:00"><strong>6:30 PM</strong> – Parade Begins! <em>(Rick Sebak of WQED serves as MC)</em></div>
+    <div class="row" data-time="2025-11-20T17:00:00-05:00" data-target="Main Street Stage"><div><strong>5:00 PM</strong> – East End Kids<span class="badge">Event</span></div></div>
+    <div class="row" data-time="2025-11-20T17:30:00-05:00" data-target="Main Street Stage"><div><strong>5:30 PM</strong> – Main Street Music Students<span class="badge">Event</span></div></div>
+    <div class="row" data-time="2025-11-20T18:00:00-05:00" data-target="Main Street Stage"><div><strong>6:00 PM</strong> – CP Music<span class="badge">Event</span></div></div>
+    <div class="row" data-time="2025-11-20T18:30:00-05:00" data-target="Tree Lighting"><div><strong>6:30 PM</strong> – Parade Begins! <em>(Rick Sebak of WQED serves as MC)</em><span class="badge">Parade</span></div></div>
   </div>
 </div>
 
 <div id="view-vendors" class="view">
   <button class="close-btn" onclick="hidePanels()">✕</button>
   <h1>🍔 Food & Shopping</h1>
-  <div class="card">
-    <div class="row"><div>Pretend Food Vendor</div><button class="btn" onclick="focusLocation('Food Vendor')">Show on Map</button></div>
-    <div class="row"><div>Pretend Craft Vendor</div><button class="btn" onclick="focusLocation('Craft Vendor')">Show on Map</button></div>
+  <div class="card" id="vendorList">
+    <div class="row">
+      <div>Pretend Food Vendor<span class="badge">Food</span></div>
+      <div>
+        <button class="btn" onclick="focusLocation('Food Vendor')">Show on Map</button>
+        <button class="btn secondary" onclick="routeToByName('Food Vendor')">Get Directions</button>
+      </div>
+    </div>
+    <div class="row">
+      <div>Pretend Craft Vendor<span class="badge">Shopping</span></div>
+      <div>
+        <button class="btn" onclick="focusLocation('Craft Vendor')">Show on Map</button>
+        <button class="btn secondary" onclick="routeToByName('Craft Vendor')">Get Directions</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -161,8 +163,20 @@ body{
   <button class="close-btn" onclick="hidePanels()">✕</button>
   <h1>🚻 Restrooms</h1>
   <div class="card">
-    <div class="row"><div>415 Main St (Public)</div><button class="btn" onclick="focusLocation('Restrooms')">Show on Map</button></div>
-    <div class="row"><div>Portable Units — S&T Bank Plaza</div><button class="btn" onclick="focusLocation('Tree Lighting')">Show on Map</button></div>
+    <div class="row">
+      <div>415 Main St (Public)<span class="badge">Restroom</span></div>
+      <div>
+        <button class="btn" onclick="focusLocation('Restrooms')">Show on Map</button>
+        <button class="btn secondary" onclick="routeToByName('Restrooms')">Get Directions</button>
+      </div>
+    </div>
+    <div class="row">
+      <div>Portable Units — S&amp;T Bank Plaza<span class="badge">Restroom</span></div>
+      <div>
+        <button class="btn" onclick="focusLocation('Tree Lighting')">Show on Map</button>
+        <button class="btn secondary" onclick="routeToByName('Tree Lighting')">Get Directions</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -171,29 +185,50 @@ body{
   <div class="nav-item" data-view="schedule"><span>📅</span>Schedule</div>
   <div class="nav-item" data-view="vendors"><span>🍔</span>Vendors</div>
   <div class="nav-item" data-view="restrooms"><span>🚻</span>Restrooms</div>
+  <div class="nav-item" data-view="search"><span>🔎</span>Search</div>
 </nav>
 
+<!-- Search tray -->
+<div class="search-tray" id="searchTray">
+  <div class="search-inner">
+    <div class="search-bar">
+      <input id="searchInput" class="search-input" type="text" placeholder="Search vendors, restrooms, events…" autofocus>
+      <button id="searchClear" class="btn secondary" type="button">Clear</button>
+    </div>
+    <div id="searchResults" class="search-results"></div>
+  </div>
+</div>
+
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
 <script>
 /* --- Map --- */
 const map=L.map('map',{zoomControl:true}).setView([40.332,-79.7105],18);
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:20}).addTo(map);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:20,attribution:'&copy; OpenStreetMap'}).addTo(map);
+
 const colors={Restrooms:"#007aff",Events:"#ff3b30",Food:"#34c759",Shopping:"#af52de"};
 function makeIcon(emoji,color){
   const svg=encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'><circle cx='20' cy='20' r='18' fill='${color}'/><text x='50%' y='55%' font-size='18' text-anchor='middle' fill='white'>${emoji}</text></svg>`);
   return L.icon({iconUrl:"data:image/svg+xml,"+svg,iconSize:[30,30],iconAnchor:[15,30],popupAnchor:[0,-28]});
 }
 const icons={Restrooms:makeIcon("🚻",colors.Restrooms),Events:makeIcon("🎄",colors.Events),Food:makeIcon("🍔",colors.Food),Shopping:makeIcon("🛍️",colors.Shopping)};
+
 const locations=[
   {position:[40.3314911,-79.710878],name:"Restrooms",description:"Public restrooms at 415 Main St.",category:"Restrooms"},
-  {position:[40.332795,-79.710338],name:"Tree Lighting",description:"At S&T Bank Plaza.",category:"Events"},
+  {position:[40.332795,-79.710338],name:"Tree Lighting",description:"S&T Bank Plaza.",category:"Events"},
+  {position:[40.332008,-79.711068],name:"Main Street Stage",description:"Live performances all evening.",category:"Events"},
   {position:[40.331993,-79.710851],name:"Food Vendor",description:"Serving warm treats all evening.",category:"Food"},
   {position:[40.332086,-79.710864],name:"Craft Vendor",description:"Handmade holiday crafts.",category:"Shopping"}
 ];
+
 const markers=[];
 locations.forEach(l=>{
-  const m=L.marker(l.position,{icon:icons[l.category]}).bindPopup(`<b>${l.name}</b><br>${l.description}`).addTo(map);
-  m.name=l.name;markers.push(m);
+  const m=L.marker(l.position,{icon:icons[l.category]})
+    .bindPopup(`<b>${l.name}</b><br>${l.description}<br><br>
+      <button class="btn" onclick="focusLocation('${l.name}')">Show on Map</button>
+      <button class="btn secondary" onclick="routeToByName('${l.name}')">Get Directions</button>`)
+    .addTo(map);
+  m.name=l.name;m.category=l.category;m._desc=l.description;markers.push(m);
 });
 const group=L.featureGroup(markers);
 map.fitBounds(group.getBounds(),{padding:[40,40]});
@@ -218,14 +253,29 @@ document.getElementById("locateMe").onclick=()=>{
 const navItems=document.querySelectorAll('.nav-item');
 const panels=document.querySelectorAll('.view');
 const overlay=document.getElementById('overlay');
+const searchTray=document.getElementById('searchTray');
 let current=null;
+
 function hidePanels(){
   panels.forEach(v=>v.classList.remove('active'));
   navItems.forEach(n=>n.classList.remove('active'));
   overlay.classList.remove('active');
+  searchTray.classList.remove('active');
   current=null;
 }
 function togglePanel(view){
+  if(view==='search'){
+    const wasOpen=searchTray.classList.contains('active');
+    hidePanels();
+    if(!wasOpen){
+      searchTray.classList.add('active');
+      document.querySelector('.nav-item[data-view="search"]').classList.add('active');
+      overlay.classList.add('active');
+      setTimeout(()=>document.getElementById('searchInput').focus(),50);
+      current='search';
+    }
+    return;
+  }
   if(current===view){hidePanels();return;}
   hidePanels();
   document.getElementById('view-'+view).classList.add('active');
@@ -237,7 +287,7 @@ overlay.onclick=hidePanels;
 map.on('click',hidePanels);
 navItems.forEach(i=>i.addEventListener('click',()=>togglePanel(i.dataset.view)));
 
-/* --- Schedule Fade Logic --- */
+/* --- Schedule Fade Logic (day-aware) --- */
 function updateSchedule(){
   const now=new Date();
   const rows=document.querySelectorAll('#scheduleList .row');
@@ -247,31 +297,175 @@ function updateSchedule(){
     const eventTime=new Date(r.dataset.time);
     const diff=(eventTime-now)/60000;
 
-    if(now<new Date("2025-11-20T00:00:00-05:00")) {
-      r.style.display="block";
-      r.classList.remove('faded','active-now');
-      return;
+    // Before event day, show all clean
+    if(now < new Date("2025-11-20T00:00:00-05:00")){
+      r.style.display="block";r.classList.remove('faded','active-now');return;
     }
+    // Hide 15 min after start, fade during the event window
     if(diff<-15){r.style.display="none";}
     else if(diff<0){r.classList.add('faded');r.classList.remove('active-now');}
-    else {r.classList.remove('faded');r.style.display="block";if(diff<soonestFuture){soonestFuture=diff;nextUpcoming=r;}}
+    else {r.classList.remove('faded');r.style.display="block"; if(diff<soonestFuture){soonestFuture=diff;nextUpcoming=r;}}
   });
-
   rows.forEach(r=>r.classList.remove('active-now'));
   if(nextUpcoming) nextUpcoming.classList.add('active-now');
+
+  // Tapping a schedule row centers its map target (if defined)
+  rows.forEach(r=>{
+    r.onclick=()=>{
+      const tgt=r.dataset.target;
+      if(tgt){ focusLocation(tgt); }
+    };
+  });
 }
 updateSchedule();
 setInterval(updateSchedule,60000);
 
-/* --- Auto Day/Night Theme --- */
-function updateMapTheme(){
-  const hour=new Date().getHours();
-  const mapContainer=document.querySelector('#map.leaflet-container');
-  if(hour>=17||hour<6){mapContainer.classList.add('night');}
-  else{mapContainer.classList.remove('night');}
+/* --- Search (smart filter across all data) --- */
+const searchInput=document.getElementById('searchInput');
+const searchResults=document.getElementById('searchResults');
+document.getElementById('searchClear').onclick=()=>{searchInput.value='';renderResults([]);searchInput.focus();};
+
+function collectSearchData(){
+  // Locations (vendors, restrooms, events)
+  const locItems = markers.map(m=>({
+    type: m.category, title: m.name, description: m._desc, target: m.name
+  }));
+  // Schedule rows
+  const schedEls=[...document.querySelectorAll('#scheduleList .row')];
+  const schedItems=schedEls.map(el=>{
+    const time=new Date(el.dataset.time);
+    const when=time.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+    const text=el.innerText.trim();
+    const target=el.dataset.target || '';
+    return { type:'Event', title:text.split('–')[0]?.trim() || 'Event', description:text, when, target };
+  });
+  return [...locItems, ...schedItems];
 }
-updateMapTheme();
-setInterval(updateMapTheme,600000); // check every 10 minutes
+
+function renderResults(items){
+  if(!items.length){searchResults.innerHTML='<div class="result">Start typing to search…</div>';return;}
+  searchResults.innerHTML = items.map(it=>`
+    <div class="result">
+      <div class="result-title">${it.title} ${it.when?`<span class="badge">${it.when}</span>`:''}</div>
+      <div class="result-meta">${it.type}${it.description?` — ${it.description}`:''}</div>
+      <div style="margin-top:6px;">
+        ${it.target?`<button class="btn" onclick="focusLocation('${it.target.replace(/'/g,"\\'")}')">Show on Map</button>`:''}
+        ${it.target?`<button class="btn secondary" onclick="routeToByName('${it.target.replace(/'/g,"\\'")}')">Get Directions</button>`:''}
+      </div>
+    </div>
+  `).join('');
+}
+
+const allData = collectSearchData();
+renderResults([]); // initial prompt
+searchInput.addEventListener('input', ()=>{
+  const q=searchInput.value.trim().toLowerCase();
+  if(!q){renderResults([]);return;}
+  const terms=q.split(/\s+/).filter(Boolean);
+  const scored=allData.map(it=>{
+    const hay=(it.title+' '+(it.description||'')+' '+(it.type||'')).toLowerCase();
+    const match=terms.every(t=>hay.includes(t));
+    const score=terms.reduce((s,t)=>s+(hay.includes(t)?1:0),0) + (it.title.toLowerCase().startsWith(terms[0])?1:0);
+    return match?{it,score}:null;
+  }).filter(Boolean).sort((a,b)=>b.score-a.score).map(x=>x.it);
+  renderResults(scored.slice(0,50));
+});
+
+/* --- Live walking directions (with auto-fade ≤50m) --- */
+let routeControl=null, userMarker=null, watchId=null, destLatLng=null;
+
+function routeToByName(name){
+  const m=markers.find(x=>x.name===name);
+  if(!m) return;
+  startRoutingTo(m.getLatLng());
+}
+
+function startRoutingTo(latlng){
+  destLatLng=L.latLng(latlng);
+  // Ask for location and start watch
+  if(!navigator.geolocation){ alert('Geolocation not supported.'); return; }
+
+  // Create routing control once
+  if(!routeControl){
+    routeControl=L.Routing.control({
+      waypoints: [],
+      addWaypoints:false, draggableWaypoints:false, fitSelectedRoutes:true,
+      show:false,
+      router: L.Routing.osrmv1({ serviceUrl:'https://router.project-osrm.org/route/v1', profile:'foot' }),
+      lineOptions:{ styles:[{color:'#2E6CF6', weight:6, opacity:0.9}] }
+    }).addTo(map);
+  }
+
+  // Start watching position (live update)
+  clearWatch();
+  watchId = navigator.geolocation.watchPosition(pos=>{
+    const here = L.latLng(pos.coords.latitude, pos.coords.longitude);
+
+    // Draw/Update user marker
+    if(!userMarker){
+      userMarker=L.circleMarker(here,{radius:8,color:"#1756ff",fillOpacity:0.9}).addTo(map);
+    } else {
+      userMarker.setLatLng(here);
+    }
+
+    // Update route
+    routeControl.setWaypoints([here, destLatLng]);
+
+    // Show cancel UI
+    document.getElementById('routeActions').classList.add('show');
+
+    // Auto-fade & end inside 50m
+    const dist = map.distance(here, destLatLng);
+    if(dist <= 50){
+      fadeOutRouteThenEnd();
+    }
+
+  }, err=>{
+    alert('Location error. Please enable location services.');
+  }, { enableHighAccuracy:true, maximumAge:1000, timeout:15000 });
+}
+
+function fadeOutRouteThenEnd(){
+  // Try fading the main route polyline if accessible
+  const line = routeControl && routeControl._line ? routeControl._line : null;
+  if(line && line.setStyle){
+    let op=0.9;
+    const f=setInterval(()=>{
+      op -= 0.18;
+      if(op<=0){ clearInterval(f); endRouting(); }
+      else { line.setStyle({opacity:op}); }
+    }, 120);
+  } else {
+    endRouting();
+  }
+}
+
+function endRouting(){
+  clearWatch();
+  if(routeControl){
+    try{ routeControl.setWaypoints([]); }catch(e){}
+    // remove lingering line immediately
+    const line = routeControl._line;
+    if(line) try{ map.removeLayer(line); }catch(e){}
+  }
+  if(userMarker){ map.removeLayer(userMarker); userMarker=null; }
+  destLatLng=null;
+  document.getElementById('routeActions').classList.remove('show');
+}
+
+function clearWatch(){
+  if(watchId!==null){ navigator.geolocation.clearWatch(watchId); watchId=null; }
+}
+
+document.getElementById('cancelRoute').onclick=endRouting;
+
+/* Utility: from schedule row click, center its target */
+document.querySelectorAll('#scheduleList .row').forEach(r=>{
+  r.addEventListener('click', ()=>{
+    const target = r.dataset.target;
+    if(target) focusLocation(target);
+  });
+});
 </script>
 </body>
 </html>
