@@ -240,11 +240,23 @@ const locations=[
 
 const markers=[];
 locations.forEach(l=>{
-  const m=L.marker(l.position,{icon:icons[l.category]})
-    .bindPopup(`<b>${l.name}</b><br>${l.description}<br><div class='btn-row'><button class="btn" onclick="focusLocation('${l.name}')">Show on Map</button><button class="btn secondary" onclick="routeToByName('${l.name}')">Get Directions</button></div>`)
+  const popupHTML = `
+    <div class="popup-content">
+      <b>${l.name}</b><br>${l.description}<br>
+      <div class="btn-row">
+        <button class="btn secondary" onclick="routeToByName('${l.name}')">Get Directions</button>
+      </div>
+    </div>
+  `;
+  const m = L.marker(l.position,{icon:icons[l.category]})
+    .bindPopup(popupHTML)
     .addTo(map);
-  m.name=l.name;m.category=l.category;m._desc=l.description;markers.push(m);
+  m.name=l.name;
+  m.category=l.category;
+  m._desc=l.description;
+  markers.push(m);
 });
+
 const group=L.featureGroup(markers);
 map.fitBounds(group.getBounds(),{padding:[40,40]});
 
