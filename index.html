@@ -54,7 +54,7 @@
   }
   .route-actions.show{display:block;}
 
-  /* Slide-up cards (centered, one at a time) */
+  /* Slide-up cards */
   .view{
     position:fixed;left:50%;bottom:0;transform:translate(-50%,100%);
     width:92%;max-width:640px;background:var(--panel-bg);
@@ -76,14 +76,32 @@
 
   /* Card content */
   .card{background:transparent;}
-  .row{padding:10px 0;border-top:1px solid rgba(0,0,0,0.1);display:flex;justify-content:space-between;gap:10px;align-items:center;}
+  .row{padding:10px 0;border-top:1px solid rgba(0,0,0,0.1);}
   .row:first-child{border-top:none;}
   .btn{background:var(--brand);color:#fff;padding:6px 10px;border:none;border-radius:8px;cursor:pointer;font-weight:600;}
   .btn:active{transform:scale(0.97);}
   .btn.secondary{background:#e9ecf7;color:#122;}
   .active-now{color:var(--brand);font-weight:700;}
   .faded{color:#bbb;opacity:0.6;}
-  .badge{display:inline-block;background:#eef3ff;color:#245; font-weight:700;border-radius:999px;padding:2px 8px;margin-left:6px;font-size:12px;}
+  .badge{display:inline-block;background:#eef3ff;color:#245;font-weight:700;border-radius:999px;padding:2px 8px;margin-left:6px;font-size:12px;}
+
+  /* Button row fix */
+  .btn-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 6px;
+  }
+  .btn-row .btn {
+    flex: 1 1 auto;
+    min-width: 130px;
+    text-align: center;
+  }
+  @media (max-width: 480px) {
+    .btn-row {flex-direction: column;align-items: stretch;}
+    .btn-row .btn {width:100%;}
+  }
 
   /* Dim overlay */
   .overlay{
@@ -118,7 +136,6 @@
 <div id="map"></div>
 <div class="overlay" id="overlay"></div>
 
-<!-- Floating controls -->
 <div class="map-actions">
   <button id="locateMe" title="Use my location">📍</button>
 </div>
@@ -144,14 +161,14 @@
   <div class="card" id="vendorList">
     <div class="row">
       <div>Pretend Food Vendor<span class="badge">Food</span></div>
-      <div>
+      <div class="btn-row">
         <button class="btn" onclick="focusLocation('Food Vendor')">Show on Map</button>
         <button class="btn secondary" onclick="routeToByName('Food Vendor')">Get Directions</button>
       </div>
     </div>
     <div class="row">
       <div>Pretend Craft Vendor<span class="badge">Shopping</span></div>
-      <div>
+      <div class="btn-row">
         <button class="btn" onclick="focusLocation('Craft Vendor')">Show on Map</button>
         <button class="btn secondary" onclick="routeToByName('Craft Vendor')">Get Directions</button>
       </div>
@@ -165,14 +182,14 @@
   <div class="card">
     <div class="row">
       <div>415 Main St (Public)<span class="badge">Restroom</span></div>
-      <div>
+      <div class="btn-row">
         <button class="btn" onclick="focusLocation('Restrooms')">Show on Map</button>
         <button class="btn secondary" onclick="routeToByName('Restrooms')">Get Directions</button>
       </div>
     </div>
     <div class="row">
       <div>Portable Units — S&amp;T Bank Plaza<span class="badge">Restroom</span></div>
-      <div>
+      <div class="btn-row">
         <button class="btn" onclick="focusLocation('Tree Lighting')">Show on Map</button>
         <button class="btn secondary" onclick="routeToByName('Tree Lighting')">Get Directions</button>
       </div>
@@ -224,22 +241,19 @@ const locations=[
 const markers=[];
 locations.forEach(l=>{
   const m=L.marker(l.position,{icon:icons[l.category]})
-    .bindPopup(`<b>${l.name}</b><br>${l.description}<br><br>
-      <button class="btn" onclick="focusLocation('${l.name}')">Show on Map</button>
-      <button class="btn secondary" onclick="routeToByName('${l.name}')">Get Directions</button>`)
+    .bindPopup(`<b>${l.name}</b><br>${l.description}<br><div class='btn-row'><button class="btn" onclick="focusLocation('${l.name}')">Show on Map</button><button class="btn secondary" onclick="routeToByName('${l.name}')">Get Directions</button></div>`)
     .addTo(map);
   m.name=l.name;m.category=l.category;m._desc=l.description;markers.push(m);
 });
 const group=L.featureGroup(markers);
 map.fitBounds(group.getBounds(),{padding:[40,40]});
 
-/* Focus on marker */
 function focusLocation(name){
   const m=markers.find(x=>x.name===name);
   if(m){hidePanels();map.setView(m.getLatLng(),19);m.openPopup();}
 }
 
-/* Locate button */
+/* Locate */
 document.getElementById("locateMe").onclick=()=>{
   navigator.geolocation?.getCurrentPosition(pos=>{
     const {latitude,longitude}=pos.coords;
@@ -268,6 +282,7 @@ function togglePanel(view){
     const wasOpen=searchTray.classList.contains('active');
     hidePanels();
     if(!wasOpen){
+      rebuildSearchIndex(); // <-- rebuild each time for fresh data
       searchTray.classList.add('active');
       document.querySelector('.nav-item[data-view="search"]').classList.add('active');
       overlay.classList.add('active');
@@ -287,7 +302,7 @@ overlay.onclick=hidePanels;
 map.on('click',hidePanels);
 navItems.forEach(i=>i.addEventListener('click',()=>togglePanel(i.dataset.view)));
 
-/* --- Schedule Fade Logic (day-aware) --- */
+/* --- Schedule logic --- */
 function updateSchedule(){
   const now=new Date();
   const rows=document.querySelectorAll('#scheduleList .row');
@@ -296,176 +311,112 @@ function updateSchedule(){
   rows.forEach(r=>{
     const eventTime=new Date(r.dataset.time);
     const diff=(eventTime-now)/60000;
-
-    // Before event day, show all clean
     if(now < new Date("2025-11-20T00:00:00-05:00")){
       r.style.display="block";r.classList.remove('faded','active-now');return;
     }
-    // Hide 15 min after start, fade during the event window
     if(diff<-15){r.style.display="none";}
-    else if(diff<0){r.classList.add('faded');r.classList.remove('active-now');}
-    else {r.classList.remove('faded');r.style.display="block"; if(diff<soonestFuture){soonestFuture=diff;nextUpcoming=r;}}
+    else if(diff<0){r.classList.add('faded');}
+    else {r.classList.remove('faded');r.style.display="block";if(diff<soonestFuture){soonestFuture=diff;nextUpcoming=r;}}
   });
   rows.forEach(r=>r.classList.remove('active-now'));
   if(nextUpcoming) nextUpcoming.classList.add('active-now');
-
-  // Tapping a schedule row centers its map target (if defined)
-  rows.forEach(r=>{
-    r.onclick=()=>{
-      const tgt=r.dataset.target;
-      if(tgt){ focusLocation(tgt); }
-    };
-  });
 }
 updateSchedule();
 setInterval(updateSchedule,60000);
 
-/* --- Search (smart filter across all data) --- */
+/* --- Search Improvements --- */
 const searchInput=document.getElementById('searchInput');
 const searchResults=document.getElementById('searchResults');
 document.getElementById('searchClear').onclick=()=>{searchInput.value='';renderResults([]);searchInput.focus();};
 
-function collectSearchData(){
-  // Locations (vendors, restrooms, events)
+let allData=[];
+function rebuildSearchIndex(){
   const locItems = markers.map(m=>({
-    type: m.category, title: m.name, description: m._desc, target: m.name
+    type:m.category,title:m.name,description:m._desc,target:m.name
   }));
-  // Schedule rows
   const schedEls=[...document.querySelectorAll('#scheduleList .row')];
   const schedItems=schedEls.map(el=>{
-    const time=new Date(el.dataset.time);
-    const when=time.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
     const text=el.innerText.trim();
-    const target=el.dataset.target || '';
-    return { type:'Event', title:text.split('–')[0]?.trim() || 'Event', description:text, when, target };
+    const target=el.dataset.target||'';
+    return {type:'Event',title:text,description:text,target};
   });
-  return [...locItems, ...schedItems];
+  allData=[...locItems,...schedItems];
 }
 
-function renderResults(items){
-  if(!items.length){searchResults.innerHTML='<div class="result">Start typing to search…</div>';return;}
+function highlight(text,q){
+  const regex=new RegExp(`(${q})`,'gi');
+  return text.replace(regex,'<mark>$1</mark>');
+}
+
+function renderResults(items,q=''){
+  if(!items.length){searchResults.innerHTML='<div class="result">No results found.</div>';return;}
   searchResults.innerHTML = items.map(it=>`
     <div class="result">
-      <div class="result-title">${it.title} ${it.when?`<span class="badge">${it.when}</span>`:''}</div>
-      <div class="result-meta">${it.type}${it.description?` — ${it.description}`:''}</div>
-      <div style="margin-top:6px;">
-        ${it.target?`<button class="btn" onclick="focusLocation('${it.target.replace(/'/g,"\\'")}')">Show on Map</button>`:''}
-        ${it.target?`<button class="btn secondary" onclick="routeToByName('${it.target.replace(/'/g,"\\'")}')">Get Directions</button>`:''}
+      <div class="result-title">${highlight(it.title,q)}</div>
+      <div class="result-meta">${it.type} — ${highlight(it.description,q)}</div>
+      <div class="btn-row">
+        <button class="btn" onclick="focusLocation('${it.target.replace(/'/g,"\\'")}')">Show on Map</button>
+        <button class="btn secondary" onclick="routeToByName('${it.target.replace(/'/g,"\\'")}')">Get Directions</button>
       </div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
-const allData = collectSearchData();
-renderResults([]); // initial prompt
-searchInput.addEventListener('input', ()=>{
+searchInput.addEventListener('input',()=>{
   const q=searchInput.value.trim().toLowerCase();
   if(!q){renderResults([]);return;}
-  const terms=q.split(/\s+/).filter(Boolean);
-  const scored=allData.map(it=>{
-    const hay=(it.title+' '+(it.description||'')+' '+(it.type||'')).toLowerCase();
-    const match=terms.every(t=>hay.includes(t));
-    const score=terms.reduce((s,t)=>s+(hay.includes(t)?1:0),0) + (it.title.toLowerCase().startsWith(terms[0])?1:0);
-    return match?{it,score}:null;
-  }).filter(Boolean).sort((a,b)=>b.score-a.score).map(x=>x.it);
-  renderResults(scored.slice(0,50));
+  const terms=q.split(/\s+/);
+  const results=allData.filter(it=>{
+    const hay=(it.title+' '+it.description+' '+it.type).toLowerCase();
+    return terms.every(t=>hay.includes(t));
+  });
+  renderResults(results.slice(0,50),q);
 });
 
-/* --- Live walking directions (with auto-fade ≤50m) --- */
-let routeControl=null, userMarker=null, watchId=null, destLatLng=null;
-
+/* --- Routing --- */
+let routeControl=null,userMarker=null,watchId=null,destLatLng=null;
 function routeToByName(name){
   const m=markers.find(x=>x.name===name);
-  if(!m) return;
+  if(!m)return;
   startRoutingTo(m.getLatLng());
 }
-
 function startRoutingTo(latlng){
   destLatLng=L.latLng(latlng);
-  // Ask for location and start watch
-  if(!navigator.geolocation){ alert('Geolocation not supported.'); return; }
-
-  // Create routing control once
+  if(!navigator.geolocation){alert('Geolocation not supported');return;}
   if(!routeControl){
     routeControl=L.Routing.control({
-      waypoints: [],
-      addWaypoints:false, draggableWaypoints:false, fitSelectedRoutes:true,
+      waypoints:[],addWaypoints:false,draggableWaypoints:false,fitSelectedRoutes:true,
       show:false,
-      router: L.Routing.osrmv1({ serviceUrl:'https://router.project-osrm.org/route/v1', profile:'foot' }),
-      lineOptions:{ styles:[{color:'#2E6CF6', weight:6, opacity:0.9}] }
+      router:L.Routing.osrmv1({serviceUrl:'https://router.project-osrm.org/route/v1',profile:'foot'}),
+      lineOptions:{styles:[{color:'#2E6CF6',weight:6,opacity:0.9}]}
     }).addTo(map);
   }
-
-  // Start watching position (live update)
   clearWatch();
-  watchId = navigator.geolocation.watchPosition(pos=>{
-    const here = L.latLng(pos.coords.latitude, pos.coords.longitude);
-
-    // Draw/Update user marker
-    if(!userMarker){
-      userMarker=L.circleMarker(here,{radius:8,color:"#1756ff",fillOpacity:0.9}).addTo(map);
-    } else {
-      userMarker.setLatLng(here);
-    }
-
-    // Update route
-    routeControl.setWaypoints([here, destLatLng]);
-
-    // Show cancel UI
+  watchId=navigator.geolocation.watchPosition(pos=>{
+    const here=L.latLng(pos.coords.latitude,pos.coords.longitude);
+    if(!userMarker){userMarker=L.circleMarker(here,{radius:8,color:"#1756ff",fillOpacity:0.9}).addTo(map);}
+    else{userMarker.setLatLng(here);}
+    routeControl.setWaypoints([here,destLatLng]);
     document.getElementById('routeActions').classList.add('show');
-
-    // Auto-fade & end inside 50m
-    const dist = map.distance(here, destLatLng);
-    if(dist <= 50){
-      fadeOutRouteThenEnd();
-    }
-
-  }, err=>{
-    alert('Location error. Please enable location services.');
-  }, { enableHighAccuracy:true, maximumAge:1000, timeout:15000 });
+    const dist=map.distance(here,destLatLng);
+    if(dist<=50){fadeOutRouteThenEnd();}
+  });
 }
-
 function fadeOutRouteThenEnd(){
-  // Try fading the main route polyline if accessible
-  const line = routeControl && routeControl._line ? routeControl._line : null;
-  if(line && line.setStyle){
+  const line=routeControl && routeControl._line ? routeControl._line : null;
+  if(line&&line.setStyle){
     let op=0.9;
-    const f=setInterval(()=>{
-      op -= 0.18;
-      if(op<=0){ clearInterval(f); endRouting(); }
-      else { line.setStyle({opacity:op}); }
-    }, 120);
-  } else {
-    endRouting();
-  }
+    const f=setInterval(()=>{op-=0.18;if(op<=0){clearInterval(f);endRouting();}else{line.setStyle({opacity:op});}},120);
+  } else endRouting();
 }
-
 function endRouting(){
   clearWatch();
-  if(routeControl){
-    try{ routeControl.setWaypoints([]); }catch(e){}
-    // remove lingering line immediately
-    const line = routeControl._line;
-    if(line) try{ map.removeLayer(line); }catch(e){}
-  }
-  if(userMarker){ map.removeLayer(userMarker); userMarker=null; }
-  destLatLng=null;
-  document.getElementById('routeActions').classList.remove('show');
+  if(routeControl){try{routeControl.setWaypoints([]);}catch(e){}}
+  if(userMarker){map.removeLayer(userMarker);userMarker=null;}
+  destLatLng=null;document.getElementById('routeActions').classList.remove('show');
 }
-
-function clearWatch(){
-  if(watchId!==null){ navigator.geolocation.clearWatch(watchId); watchId=null; }
-}
-
+function clearWatch(){if(watchId!==null){navigator.geolocation.clearWatch(watchId);watchId=null;}}
 document.getElementById('cancelRoute').onclick=endRouting;
-
-/* Utility: from schedule row click, center its target */
-document.querySelectorAll('#scheduleList .row').forEach(r=>{
-  r.addEventListener('click', ()=>{
-    const target = r.dataset.target;
-    if(target) focusLocation(target);
-  });
-});
 </script>
+
 </body>
 </html>
