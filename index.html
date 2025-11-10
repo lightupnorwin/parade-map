@@ -7,6 +7,7 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css">
+
 <style>
 html,body{height:100%;margin:0;overflow:hidden;}
 #map{height:100%;width:100%;position:absolute;top:0;left:0;z-index:1;}
@@ -26,14 +27,72 @@ box-shadow:0 2px 8px rgba(0,0,0,0.3);transition:transform .15s ease;}
 .route-actions .cancel{background:#fff;border:none;border-radius:999px;padding:10px 14px;font-weight:700;
 box-shadow:0 2px 8px rgba(0,0,0,.3);cursor:pointer;}
 .route-actions.show{display:block;}
-.view{position:fixed;left:50%;bottom:0;transform:translate(-50%,100%);width:92%;max-width:640px;background:var(--panel-bg);
-border-top-left-radius:16px;border-top-right-radius:16px;box-shadow:0 -3px 15px rgba(0,0,0,0.25);
-padding:60px 20px calc(90px + env(safe-area-inset-bottom));max-height:70vh;overflow-y:auto;
-transition:transform .35s ease;z-index:10;backdrop-filter:blur(8px);pointer-events:none;visibility:hidden;}
-.view.active{transform:translate(-50%,0);pointer-events:auto;visibility:visible;z-index:20;}
-.close-btn{position:absolute;top:calc(env(safe-area-inset-top,0px)+12px);right:calc(env(safe-area-inset-right,0px)+12px);
-border:none;background:rgba(255,255,255,0.9);color:#000;font-size:22px;border-radius:50%;width:40px;height:40px;
-cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.3);z-index:30;}
+
+/* --- Panels --- */
+.view {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  transform: translate(-50%, 100%);
+  width: 92%;
+  max-width: 640px;
+  background: var(--panel-bg);
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  box-shadow: 0 -3px 15px rgba(0,0,0,0.25);
+  display: flex;
+  flex-direction: column;
+  max-height: 70vh;
+  overflow: hidden;
+  transition: transform 0.35s ease;
+  z-index: 10;
+  backdrop-filter: blur(8px);
+  pointer-events: none;
+  visibility: hidden;
+}
+.view.active {
+  transform: translate(-50%, 0);
+  pointer-events: auto;
+  visibility: visible;
+  z-index: 20;
+}
+
+/* Sticky header inside panels */
+.view-header {
+  position: sticky;
+  top: 0;
+  background: var(--panel-bg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 10px 20px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  z-index: 25;
+}
+.view-header h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.close-btn {
+  border: none;
+  background: rgba(255, 255, 255, 0.95);
+  color: #000;
+  font-size: 20px;
+  font-weight: bold;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  flex-shrink: 0;
+}
+.close-btn:active { transform: scale(0.95); }
+.scroll-inner { flex: 1; overflow-y: auto; padding: 10px 20px 90px; }
+
 .card{background:transparent;}
 .row{padding:10px 0;border-top:1px solid rgba(0,0,0,0.1);}
 .row:first-child{border-top:none;}
@@ -69,50 +128,73 @@ transform:translateY(-110%);transition:transform .25s ease;box-shadow:0 2px 10px
 
 <!-- Panels -->
 <div id="view-schedule" class="view">
-<button class="close-btn" onclick="hidePanels()">✕</button>
-<h1>📅 Schedule</h1>
-<div class="card" id="scheduleList">
-<div class="row" data-time="2025-11-20T17:00:00-05:00" data-target="Main Street Stage"><strong>5:00 PM</strong> – East End Kids<span class="badge">Event</span></div>
-<div class="row" data-time="2025-11-20T17:30:00-05:00" data-target="Main Street Stage"><strong>5:30 PM</strong> – Main Street Music Students<span class="badge">Event</span></div>
-<div class="row" data-time="2025-11-20T18:00:00-05:00" data-target="Main Street Stage"><strong>6:00 PM</strong> – CP Music<span class="badge">Event</span></div>
-<div class="row" data-time="2025-11-20T18:30:00-05:00" data-target="Tree Lighting"><strong>6:30 PM</strong> – Parade Begins! <em>(Rick Sebak of WQED serves as MC)</em><span class="badge">Parade</span></div>
-</div></div>
+  <div class="view-header">
+    <h1>📅 Schedule</h1>
+    <button class="close-btn" onclick="hidePanels()">✕</button>
+  </div>
+  <div class="scroll-inner">
+    <div class="card" id="scheduleList">
+      <div class="row" data-time="2025-11-20T17:00:00-05:00" data-target="Main Street Stage"><strong>5:00 PM</strong> – East End Kids<span class="badge">Event</span></div>
+      <div class="row" data-time="2025-11-20T17:30:00-05:00" data-target="Main Street Stage"><strong>5:30 PM</strong> – Main Street Music Students<span class="badge">Event</span></div>
+      <div class="row" data-time="2025-11-20T18:00:00-05:00" data-target="Main Street Stage"><strong>6:00 PM</strong> – CP Music<span class="badge">Event</span></div>
+      <div class="row" data-time="2025-11-20T18:30:00-05:00" data-target="Tree Lighting"><strong>6:30 PM</strong> – Parade Begins! <em>(Rick Sebak of WQED serves as MC)</em><span class="badge">Parade</span></div>
+    </div>
+  </div>
+</div>
 
 <div id="view-vendors" class="view">
-<button class="close-btn" onclick="hidePanels()">✕</button>
-<h1>🍔 Food & Shopping</h1>
-<div class="card" id="vendorList"></div>
+  <div class="view-header">
+    <h1>🍔 Food & Shopping</h1>
+    <button class="close-btn" onclick="hidePanels()">✕</button>
+  </div>
+  <div class="scroll-inner">
+    <div class="card" id="vendorList"></div>
+  </div>
 </div>
 
 <div id="view-restrooms" class="view">
-<button class="close-btn" onclick="hidePanels()">✕</button>
-<h1>🚻 Restrooms</h1>
-<div class="card">
-<div class="row"><div>415 Main St (Public)<span class="badge">Restroom</span></div>
-<div class="btn-row"><button class="btn" onclick="focusLocation('Restrooms')">Show on Map</button>
-<button class="btn secondary" onclick="routeToByName('Restrooms')">Get Directions</button></div></div>
-<div class="row"><div>Portable Units — S&T Bank Plaza<span class="badge">Restroom</span></div>
-<div class="btn-row"><button class="btn" onclick="focusLocation('Tree Lighting')">Show on Map</button>
-<button class="btn secondary" onclick="routeToByName('Tree Lighting')">Get Directions</button></div></div>
-</div></div>
+  <div class="view-header">
+    <h1>🚻 Restrooms</h1>
+    <button class="close-btn" onclick="hidePanels()">✕</button>
+  </div>
+  <div class="scroll-inner">
+    <div class="card">
+      <div class="row"><div>415 Main St (Public)<span class="badge">Restroom</span></div>
+        <div class="btn-row">
+          <button class="btn" onclick="focusLocation('Restrooms')">Show on Map</button>
+          <button class="btn secondary" onclick="routeToByName('Restrooms')">Get Directions</button>
+        </div>
+      </div>
+      <div class="row"><div>Portable Units — S&amp;T Bank Plaza<span class="badge">Restroom</span></div>
+        <div class="btn-row">
+          <button class="btn" onclick="focusLocation('Tree Lighting')">Show on Map</button>
+          <button class="btn secondary" onclick="routeToByName('Tree Lighting')">Get Directions</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Top Nav -->
 <nav class="top-nav">
-<div class="nav-item" data-view="schedule"><span>📅</span>Schedule</div>
-<div class="nav-item" data-view="vendors"><span>🍔</span>Vendors</div>
-<div class="nav-item" data-view="restrooms"><span>🚻</span>Restrooms</div>
-<div class="nav-item" data-view="search"><span>🔎</span>Search</div>
+  <div class="nav-item" data-view="schedule"><span>📅</span>Schedule</div>
+  <div class="nav-item" data-view="vendors"><span>🍔</span>Vendors</div>
+  <div class="nav-item" data-view="restrooms"><span>🚻</span>Restrooms</div>
+  <div class="nav-item" data-view="search"><span>🔎</span>Search</div>
 </nav>
 
 <!-- Search tray -->
 <div class="search-tray" id="searchTray">
-<div class="search-inner">
-<div class="search-bar">
-<input id="searchInput" class="search-input" type="text" placeholder="Search vendors, restrooms, events…" autofocus>
-<button id="searchClear" class="btn secondary" type="button">Clear</button>
+  <div class="search-inner">
+    <div class="search-bar">
+      <input id="searchInput" class="search-input" type="text" placeholder="Search vendors, restrooms, events…" autofocus>
+      <button id="searchClear" class="btn secondary" type="button">Clear</button>
+    </div>
+    <div id="searchResults" class="search-results"></div>
+  </div>
 </div>
-<div id="searchResults" class="search-results"></div>
-</div></div>
+
+<!-- JS imports -->
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
