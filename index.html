@@ -7,428 +7,229 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css">
-
 <style>
-  html,body{height:100%;margin:0;overflow:hidden;}
-  #map{height:100%;width:100%;position:absolute;top:0;left:0;z-index:1;}
-  :root{
-    --brand:#1756ff;
-    --bg:#fff;
-    --ink:#111;
-    --muted:#666;
-    --panel-bg:linear-gradient(180deg,#fff 0%,#f8f9fb 100%);
-  }
-  body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;}
-
-  /* --- TOP NAV --- */
-  .top-nav{
-    position:fixed;top:0;left:0;width:100%;height:70px;
-    background:var(--panel-bg);
-    display:flex;justify-content:space-around;align-items:center;
-    box-shadow:0 2px 8px rgba(0,0,0,0.15);border-bottom:1px solid #ddd;
-    z-index:15;padding-top:env(safe-area-inset-top,0);
-  }
-  .nav-item{flex:1;text-align:center;cursor:pointer;font-weight:600;color:#555;transition:color .2s;}
-  .nav-item span{display:block;font-size:22px;margin-bottom:2px;}
-  .nav-item.active{color:var(--brand);}
-
-  /* Floating buttons */
-  .map-actions{
-    position:absolute;top:90px;right:20px;
-    display:flex;flex-direction:column;gap:8px;z-index:12;
-  }
-  .map-actions button{
-    background:#fff;border:none;border-radius:50%;width:46px;height:46px;
-    font-size:22px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.3);
-    transition:transform .15s ease;
-  }
-  .map-actions button:active{transform:scale(0.95);}
-
-  /* Cancel routing button */
-  .route-actions{
-    position:absolute;top:90px;left:20px;z-index:12;display:none;
-  }
-  .route-actions .cancel{
-    background:#fff;border:none;border-radius:999px;padding:10px 14px;
-    font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.3);cursor:pointer;
-  }
-  .route-actions.show{display:block;}
-
-  /* Slide-up cards */
-  .view{
-    position:fixed;left:50%;bottom:0;transform:translate(-50%,100%);
-    width:92%;max-width:640px;background:var(--panel-bg);
-    border-top-left-radius:16px;border-top-right-radius:16px;
-    box-shadow:0 -3px 15px rgba(0,0,0,0.25);
-    padding:60px 20px calc(90px + env(safe-area-inset-bottom));
-    max-height:70vh;overflow-y:auto;transition:transform .35s ease;
-    z-index:10;backdrop-filter:blur(8px);pointer-events:none;visibility:hidden;
-  }
-  .view.active{transform:translate(-50%,0);pointer-events:auto;visibility:visible;z-index:20;}
-
-  /* Close button */
-  .close-btn{
-    position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);right:calc(env(safe-area-inset-right,0px) + 12px);
-    border:none;background:rgba(255,255,255,0.9);color:#000;font-size:22px;border-radius:50%;
-    width:40px;height:40px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.3);z-index:30;
-  }
-  .close-btn:active{transform:scale(0.95);}
-
-  /* Card content */
-  .card{background:transparent;}
-  .row{padding:10px 0;border-top:1px solid rgba(0,0,0,0.1);}
-  .row:first-child{border-top:none;}
-  .btn{background:var(--brand);color:#fff;padding:6px 10px;border:none;border-radius:8px;cursor:pointer;font-weight:600;}
-  .btn:active{transform:scale(0.97);}
-  .btn.secondary{background:#e9ecf7;color:#122;}
-  .active-now{color:var(--brand);font-weight:700;}
-  .faded{color:#bbb;opacity:0.6;}
-  .badge{display:inline-block;background:#eef3ff;color:#245;font-weight:700;border-radius:999px;padding:2px 8px;margin-left:6px;font-size:12px;}
-
-  /* Button row fix */
-  .btn-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    justify-content: flex-end;
-    margin-top: 6px;
-  }
-  .btn-row .btn {
-    flex: 1 1 auto;
-    min-width: 130px;
-    text-align: center;
-  }
-  @media (max-width: 480px) {
-    .btn-row {flex-direction: column;align-items: stretch;}
-    .btn-row .btn {width:100%;}
-  }
-
-  /* Dim overlay */
-  .overlay{
-    position:fixed;top:0;left:0;width:100%;height:100%;
-    background:rgba(0,0,0,0.25);opacity:0;visibility:hidden;transition:opacity .25s;z-index:5;
-  }
-  .overlay.active{opacity:1;visibility:visible;}
-
-  /* Search tray under nav */
-  .search-tray{
-    position:fixed;top:70px;left:0;width:100%;
-    background:#fff;border-bottom:1px solid #ddd;z-index:14;
-    transform:translateY(-110%);transition:transform .25s ease;
-    box-shadow:0 2px 10px rgba(0,0,0,0.1);
-  }
-  .search-tray.active{transform:translateY(0);}
-  .search-inner{padding:10px 12px 14px;}
-  .search-bar{display:flex;gap:8px;}
-  .search-input{flex:1;border:1px solid #ddd;border-radius:12px;padding:10px 12px;font-size:16px;outline:none;}
-  .search-results{max-height:50vh;overflow:auto;margin-top:8px;}
-  .result{padding:10px;border-top:1px solid #eee;}
-  .result-title{font-weight:700;}
-  .result-meta{color:#666;font-size:13px;margin:2px 0 6px;}
-  .result .btn{margin-right:6px;}
-
-  /* Hide LRM's default panel */
-  .leaflet-routing-container{display:none;}
+html,body{height:100%;margin:0;overflow:hidden;}
+#map{height:100%;width:100%;position:absolute;top:0;left:0;z-index:1;}
+:root{--brand:#1756ff;--bg:#fff;--ink:#111;--muted:#666;--panel-bg:linear-gradient(180deg,#fff 0%,#f8f9fb 100%);}
+body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;}
+.top-nav{position:fixed;top:0;left:0;width:100%;height:70px;background:var(--panel-bg);
+display:flex;justify-content:space-around;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);
+border-bottom:1px solid #ddd;z-index:15;padding-top:env(safe-area-inset-top,0);}
+.nav-item{flex:1;text-align:center;cursor:pointer;font-weight:600;color:#555;transition:color .2s;}
+.nav-item span{display:block;font-size:22px;margin-bottom:2px;}
+.nav-item.active{color:var(--brand);}
+.map-actions{position:absolute;top:90px;right:20px;display:flex;flex-direction:column;gap:8px;z-index:12;}
+.map-actions button{background:#fff;border:none;border-radius:50%;width:46px;height:46px;font-size:22px;cursor:pointer;
+box-shadow:0 2px 8px rgba(0,0,0,0.3);transition:transform .15s ease;}
+.map-actions button:active{transform:scale(0.95);}
+.route-actions{position:absolute;top:90px;left:20px;z-index:12;display:none;}
+.route-actions .cancel{background:#fff;border:none;border-radius:999px;padding:10px 14px;font-weight:700;
+box-shadow:0 2px 8px rgba(0,0,0,.3);cursor:pointer;}
+.route-actions.show{display:block;}
+.view{position:fixed;left:50%;bottom:0;transform:translate(-50%,100%);width:92%;max-width:640px;background:var(--panel-bg);
+border-top-left-radius:16px;border-top-right-radius:16px;box-shadow:0 -3px 15px rgba(0,0,0,0.25);
+padding:60px 20px calc(90px + env(safe-area-inset-bottom));max-height:70vh;overflow-y:auto;
+transition:transform .35s ease;z-index:10;backdrop-filter:blur(8px);pointer-events:none;visibility:hidden;}
+.view.active{transform:translate(-50%,0);pointer-events:auto;visibility:visible;z-index:20;}
+.close-btn{position:absolute;top:calc(env(safe-area-inset-top,0px)+12px);right:calc(env(safe-area-inset-right,0px)+12px);
+border:none;background:rgba(255,255,255,0.9);color:#000;font-size:22px;border-radius:50%;width:40px;height:40px;
+cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.3);z-index:30;}
+.card{background:transparent;}
+.row{padding:10px 0;border-top:1px solid rgba(0,0,0,0.1);}
+.row:first-child{border-top:none;}
+.btn{background:var(--brand);color:#fff;padding:6px 10px;border:none;border-radius:8px;cursor:pointer;font-weight:600;}
+.btn:active{transform:scale(0.97);}
+.btn.secondary{background:#e9ecf7;color:#122;}
+.badge{display:inline-block;background:#eef3ff;color:#245;font-weight:700;border-radius:999px;
+padding:2px 8px;margin-left:6px;font-size:12px;}
+.btn-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;margin-top:6px;}
+@media(max-width:480px){.btn-row{flex-direction:column;align-items:stretch}.btn-row .btn{width:100%}}
+.overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.25);
+opacity:0;visibility:hidden;transition:opacity .25s;z-index:5;}
+.overlay.active{opacity:1;visibility:visible;}
+.search-tray{position:fixed;top:70px;left:0;width:100%;background:#fff;border-bottom:1px solid #ddd;z-index:14;
+transform:translateY(-110%);transition:transform .25s ease;box-shadow:0 2px 10px rgba(0,0,0,0.1);}
+.search-tray.active{transform:translateY(0);}
+.search-inner{padding:10px 12px 14px;}
+.search-bar{display:flex;gap:8px;}
+.search-input{flex:1;border:1px solid #ddd;border-radius:12px;padding:10px 12px;font-size:16px;outline:none;}
+.search-results{max-height:50vh;overflow:auto;margin-top:8px;}
+.result{padding:10px;border-top:1px solid #eee;}
+.result-title{font-weight:700;}
+.result-meta{color:#666;font-size:13px;margin:2px 0 6px;}
+.leaflet-routing-container{display:none;}
 </style>
 </head>
 
 <body>
 <div id="map"></div>
 <div class="overlay" id="overlay"></div>
-
-<div class="map-actions">
-  <button id="locateMe" title="Use my location">📍</button>
-</div>
-<div class="route-actions" id="routeActions">
-  <button class="cancel" id="cancelRoute">Cancel Directions</button>
-</div>
+<div class="map-actions"><button id="locateMe" title="Use my location">📍</button></div>
+<div class="route-actions" id="routeActions"><button class="cancel" id="cancelRoute">Cancel Directions</button></div>
 
 <!-- Panels -->
 <div id="view-schedule" class="view">
-  <button class="close-btn" onclick="hidePanels()">✕</button>
-  <h1>📅 Schedule</h1>
-  <div class="card" id="scheduleList">
-    <div class="row" data-time="2025-11-20T17:00:00-05:00" data-target="Main Street Stage"><div><strong>5:00 PM</strong> – East End Kids<span class="badge">Event</span></div></div>
-    <div class="row" data-time="2025-11-20T17:30:00-05:00" data-target="Main Street Stage"><div><strong>5:30 PM</strong> – Main Street Music Students<span class="badge">Event</span></div></div>
-    <div class="row" data-time="2025-11-20T18:00:00-05:00" data-target="Main Street Stage"><div><strong>6:00 PM</strong> – CP Music<span class="badge">Event</span></div></div>
-    <div class="row" data-time="2025-11-20T18:30:00-05:00" data-target="Tree Lighting"><div><strong>6:30 PM</strong> – Parade Begins! <em>(Rick Sebak of WQED serves as MC)</em><span class="badge">Parade</span></div></div>
-  </div>
-</div>
+<button class="close-btn" onclick="hidePanels()">✕</button>
+<h1>📅 Schedule</h1>
+<div class="card" id="scheduleList">
+<div class="row" data-time="2025-11-20T17:00:00-05:00" data-target="Main Street Stage"><strong>5:00 PM</strong> – East End Kids<span class="badge">Event</span></div>
+<div class="row" data-time="2025-11-20T17:30:00-05:00" data-target="Main Street Stage"><strong>5:30 PM</strong> – Main Street Music Students<span class="badge">Event</span></div>
+<div class="row" data-time="2025-11-20T18:00:00-05:00" data-target="Main Street Stage"><strong>6:00 PM</strong> – CP Music<span class="badge">Event</span></div>
+<div class="row" data-time="2025-11-20T18:30:00-05:00" data-target="Tree Lighting"><strong>6:30 PM</strong> – Parade Begins! <em>(Rick Sebak of WQED serves as MC)</em><span class="badge">Parade</span></div>
+</div></div>
 
 <div id="view-vendors" class="view">
-  <button class="close-btn" onclick="hidePanels()">✕</button>
-  <h1>🍔 Food & Shopping</h1>
-  <div class="card" id="vendorList">
-    <div class="row">
-      <div>Pretend Food Vendor<span class="badge">Food</span></div>
-      <div class="btn-row">
-        <button class="btn" onclick="focusLocation('Food Vendor')">Show on Map</button>
-        <button class="btn secondary" onclick="routeToByName('Food Vendor')">Get Directions</button>
-      </div>
-    </div>
-    <div class="row">
-      <div>Pretend Craft Vendor<span class="badge">Shopping</span></div>
-      <div class="btn-row">
-        <button class="btn" onclick="focusLocation('Craft Vendor')">Show on Map</button>
-        <button class="btn secondary" onclick="routeToByName('Craft Vendor')">Get Directions</button>
-      </div>
-    </div>
-  </div>
+<button class="close-btn" onclick="hidePanels()">✕</button>
+<h1>🍔 Food & Shopping</h1>
+<div class="card" id="vendorList"></div>
 </div>
 
 <div id="view-restrooms" class="view">
-  <button class="close-btn" onclick="hidePanels()">✕</button>
-  <h1>🚻 Restrooms</h1>
-  <div class="card">
-    <div class="row">
-      <div>415 Main St (Public)<span class="badge">Restroom</span></div>
-      <div class="btn-row">
-        <button class="btn" onclick="focusLocation('Restrooms')">Show on Map</button>
-        <button class="btn secondary" onclick="routeToByName('Restrooms')">Get Directions</button>
-      </div>
-    </div>
-    <div class="row">
-      <div>Portable Units — S&amp;T Bank Plaza<span class="badge">Restroom</span></div>
-      <div class="btn-row">
-        <button class="btn" onclick="focusLocation('Tree Lighting')">Show on Map</button>
-        <button class="btn secondary" onclick="routeToByName('Tree Lighting')">Get Directions</button>
-      </div>
-    </div>
-  </div>
-</div>
+<button class="close-btn" onclick="hidePanels()">✕</button>
+<h1>🚻 Restrooms</h1>
+<div class="card">
+<div class="row"><div>415 Main St (Public)<span class="badge">Restroom</span></div>
+<div class="btn-row"><button class="btn" onclick="focusLocation('Restrooms')">Show on Map</button>
+<button class="btn secondary" onclick="routeToByName('Restrooms')">Get Directions</button></div></div>
+<div class="row"><div>Portable Units — S&T Bank Plaza<span class="badge">Restroom</span></div>
+<div class="btn-row"><button class="btn" onclick="focusLocation('Tree Lighting')">Show on Map</button>
+<button class="btn secondary" onclick="routeToByName('Tree Lighting')">Get Directions</button></div></div>
+</div></div>
 
 <!-- Top Nav -->
 <nav class="top-nav">
-  <div class="nav-item" data-view="schedule"><span>📅</span>Schedule</div>
-  <div class="nav-item" data-view="vendors"><span>🍔</span>Vendors</div>
-  <div class="nav-item" data-view="restrooms"><span>🚻</span>Restrooms</div>
-  <div class="nav-item" data-view="search"><span>🔎</span>Search</div>
+<div class="nav-item" data-view="schedule"><span>📅</span>Schedule</div>
+<div class="nav-item" data-view="vendors"><span>🍔</span>Vendors</div>
+<div class="nav-item" data-view="restrooms"><span>🚻</span>Restrooms</div>
+<div class="nav-item" data-view="search"><span>🔎</span>Search</div>
 </nav>
 
 <!-- Search tray -->
 <div class="search-tray" id="searchTray">
-  <div class="search-inner">
-    <div class="search-bar">
-      <input id="searchInput" class="search-input" type="text" placeholder="Search vendors, restrooms, events…" autofocus>
-      <button id="searchClear" class="btn secondary" type="button">Clear</button>
-    </div>
-    <div id="searchResults" class="search-results"></div>
-  </div>
+<div class="search-inner">
+<div class="search-bar">
+<input id="searchInput" class="search-input" type="text" placeholder="Search vendors, restrooms, events…" autofocus>
+<button id="searchClear" class="btn secondary" type="button">Clear</button>
 </div>
+<div id="searchResults" class="search-results"></div>
+</div></div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
 <script>
-/* --- Map --- */
 const map=L.map('map',{zoomControl:true}).setView([40.332,-79.7105],18);
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:20,attribution:'&copy; OpenStreetMap'}).addTo(map);
-
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:20}).addTo(map);
 const colors={Restrooms:"#007aff",Events:"#ff3b30",Food:"#34c759",Shopping:"#af52de"};
-function makeIcon(emoji,color){
-  const svg=encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'><circle cx='20' cy='20' r='18' fill='${color}'/><text x='50%' y='55%' font-size='18' text-anchor='middle' fill='white'>${emoji}</text></svg>`);
-  return L.icon({iconUrl:"data:image/svg+xml,"+svg,iconSize:[30,30],iconAnchor:[15,30],popupAnchor:[0,-28]});
-}
+function makeIcon(e,c){const s=encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'><circle cx='20' cy='20' r='18' fill='${c}'/><text x='50%' y='55%' font-size='18' text-anchor='middle' fill='white'>${e}</text></svg>`);return L.icon({iconUrl:"data:image/svg+xml,"+s,iconSize:[30,30],iconAnchor:[15,30],popupAnchor:[0,-28]});}
 const icons={Restrooms:makeIcon("🚻",colors.Restrooms),Events:makeIcon("🎄",colors.Events),Food:makeIcon("🍔",colors.Food),Shopping:makeIcon("🛍️",colors.Shopping)};
-
-const locations=[
-  {position:[40.3314911,-79.710878],name:"Restrooms",description:"Public restrooms at 415 Main St.",category:"Restrooms"},
-  {position:[40.332795,-79.710338],name:"Tree Lighting",description:"S&T Bank Plaza.",category:"Events"},
-  {position:[40.332008,-79.711068],name:"Main Street Stage",description:"Live performances all evening.",category:"Events"},
-  {position:[40.331993,-79.710851],name:"Food Vendor",description:"Serving warm treats all evening.",category:"Food"},
-  {position:[40.332086,-79.710864],name:"Craft Vendor",description:"Handmade holiday crafts.",category:"Shopping"}
+const basePins=[
+{position:[40.3314911,-79.710878],name:"Restrooms",description:"Public restrooms at 415 Main St.",category:"Restrooms"},
+{position:[40.332795,-79.710338],name:"Tree Lighting",description:"S&T Bank Plaza.",category:"Events"},
+{position:[40.332008,-79.711068],name:"Main Street Stage",description:"Live performances all evening.",category:"Events"},
+{position:[40.331993,-79.710851],name:"Food Vendor",description:"Serving warm treats all evening.",category:"Food"},
+{position:[40.332086,-79.710864],name:"Craft Vendor",description:"Handmade holiday crafts.",category:"Shopping"}
 ];
-
 const markers=[];
-locations.forEach(l=>{
-  const popupHTML = `
-    <div class="popup-content">
-      <b>${l.name}</b><br>${l.description}<br>
-      <div class="btn-row">
-        <button class="btn secondary" onclick="routeToByName('${l.name}')">Get Directions</button>
-      </div>
-    </div>
-  `;
-  const m = L.marker(l.position,{icon:icons[l.category]})
-    .bindPopup(popupHTML)
-    .addTo(map);
-  m.name=l.name;
-  m.category=l.category;
-  m._desc=l.description;
-  markers.push(m);
-});
-
-const group=L.featureGroup(markers);
-map.fitBounds(group.getBounds(),{padding:[40,40]});
-
-function focusLocation(name){
-  const m=markers.find(x=>x.name===name);
-  if(m){hidePanels();map.setView(m.getLatLng(),19);m.openPopup();}
-}
-
-/* Locate */
-document.getElementById("locateMe").onclick=()=>{
-  navigator.geolocation?.getCurrentPosition(pos=>{
-    const {latitude,longitude}=pos.coords;
-    map.setView([latitude,longitude],18);
-    L.circleMarker([latitude,longitude],{radius:8,color:"#1756ff",fillOpacity:0.9})
-      .addTo(map).bindPopup("You are here").openPopup();
-  });
-};
-
-/* Panel logic */
-const navItems=document.querySelectorAll('.nav-item');
-const panels=document.querySelectorAll('.view');
-const overlay=document.getElementById('overlay');
-const searchTray=document.getElementById('searchTray');
-let current=null;
-
-function hidePanels(){
-  panels.forEach(v=>v.classList.remove('active'));
-  navItems.forEach(n=>n.classList.remove('active'));
-  overlay.classList.remove('active');
-  searchTray.classList.remove('active');
-  current=null;
-}
-function togglePanel(view){
-  if(view==='search'){
-    const wasOpen=searchTray.classList.contains('active');
-    hidePanels();
-    if(!wasOpen){
-      rebuildSearchIndex(); // <-- rebuild each time for fresh data
-      searchTray.classList.add('active');
-      document.querySelector('.nav-item[data-view="search"]').classList.add('active');
-      overlay.classList.add('active');
-      setTimeout(()=>document.getElementById('searchInput').focus(),50);
-      current='search';
-    }
-    return;
-  }
-  if(current===view){hidePanels();return;}
-  hidePanels();
-  document.getElementById('view-'+view).classList.add('active');
-  document.querySelector(`.nav-item[data-view="${view}"]`).classList.add('active');
-  overlay.classList.add('active');
-  current=view;
-}
-overlay.onclick=hidePanels;
-map.on('click',hidePanels);
+basePins.forEach(l=>{
+const popup=`<b>${l.name}</b><br>${l.description}<br>
+<div class='btn-row'><button class='btn secondary' onclick="routeToByName('${l.name}')">Get Directions</button>
+${l.name==="Main Street Stage"?"<button class='btn' onclick=\"togglePanel('schedule')\">Show Schedule</button>":""}</div>`;
+const m=L.marker(l.position,{icon:icons[l.category]}).bindPopup(popup).addTo(map);
+m.name=l.name;m.category=l.category;m._desc=l.description;m._hasCoords=true;markers.push(m);});
+map.fitBounds(L.featureGroup(markers).getBounds(),{padding:[40,40]});
+function focusLocation(n){const m=markers.find(x=>x.name===n);if(m){hidePanels();map.setView(m.getLatLng(),19);m.openPopup();}}
+document.getElementById("locateMe").onclick=()=>navigator.geolocation?.getCurrentPosition(p=>{map.setView([p.coords.latitude,p.coords.longitude],18);L.circleMarker([p.coords.latitude,p.coords.longitude],{radius:8,color:"#1756ff",fillOpacity:.9}).addTo(map).bindPopup("You are here").openPopup();});
+const navItems=document.querySelectorAll('.nav-item'),panels=document.querySelectorAll('.view'),
+overlay=document.getElementById('overlay'),searchTray=document.getElementById('searchTray');let current=null;
+function hidePanels(){panels.forEach(v=>v.classList.remove('active'));navItems.forEach(n=>n.classList.remove('active'));
+overlay.classList.remove('active');searchTray.classList.remove('active');current=null;}
+function togglePanel(v){if(v==='search'){const o=searchTray.classList.contains('active');hidePanels();
+if(!o){rebuildSearchIndex();searchTray.classList.add('active');document.querySelector('.nav-item[data-view="search"]').classList.add('active');
+overlay.classList.add('active');setTimeout(()=>document.getElementById('searchInput').focus(),50);current='search';}return;}
+if(current===v){hidePanels();return;}hidePanels();document.getElementById('view-'+v).classList.add('active');
+document.querySelector(`.nav-item[data-view="${v}"]`).classList.add('active');overlay.classList.add('active');current=v;}
+overlay.onclick=hidePanels;map.on('click',hidePanels);
 navItems.forEach(i=>i.addEventListener('click',()=>togglePanel(i.dataset.view)));
+function updateSchedule(){const n=new Date(),r=document.querySelectorAll('#scheduleList .row');let a=null,s=1/0;
+r.forEach(e=>{const t=new Date(e.dataset.time),d=(t-n)/6e4;if(n<new Date("2025-11-20T00:00:00-05:00")){e.style.display="block";e.classList.remove('faded','active-now');return;}
+if(d<-15)e.style.display="none";else if(d<0)e.classList.add('faded');else{e.classList.remove('faded');e.style.display="block";if(d<s){s=d;a=e;}}});
+r.forEach(e=>e.classList.remove('active-now'));if(a)a.classList.add('active-now');}
+updateSchedule();setInterval(updateSchedule,6e4);
 
-/* --- Schedule logic --- */
-function updateSchedule(){
-  const now=new Date();
-  const rows=document.querySelectorAll('#scheduleList .row');
-  let nextUpcoming=null,soonestFuture=Infinity;
+/* Vendors */
+const vendorsData=[
+{name:"WPF Concessions",cat:"Food",desc:"Wings, bites, pizza muffins, fries, nachos, soda & water."},
+{name:"High On The Hog",cat:"Food",desc:"BBQ favorites."},
+{name:"Truckin Triangles",cat:"Food",desc:"Stuffed triangles with assorted meats."},
+{name:"Hermesfoodtrucks",cat:"Food",desc:"Gyros, burgers, tenders, fries, cheesesticks, baklava, fried Oreos."},
+{name:"PGH Crepes",cat:"Food",desc:"Crêpes, fries & lemonade."},
+{name:"Millie’s Homemade Ice Cream",cat:"Food",desc:"Ice cream treats."},
+{name:"Travelin' Tom’s Coffee Truck",cat:"Food",desc:"Espresso, chai, hot chocolate, refreshers."},
+{name:"Mutiny Donuts",cat:"Food",desc:"Fresh donuts made on site."},
+{name:"Fox’s Pizza North Huntingdon",cat:"Food",desc:"Pizza, drinks, cookies, light-up toys."},
+{name:"The Rustic Roamer LLC",cat:"Food",desc:"Specialty coffee & baked goods."},
+{name:"Court Yard Concessions",cat:"Food",desc:"Funnel cakes, fried Oreos, corn dogs, pretzels."},
+{name:"carmine’s pizza neapolitana",cat:"Food",desc:"Artisan pizza by the slice & whole."},
+{name:"Live Casino",cat:"Shopping",desc:"Promo items & literature."},
+{name:"A & A Novelties LLC",cat:"Shopping",desc:"Light-up toys & Christmas novelties."},
+{name:"Tie Dyed By Aimee",cat:"Shopping",desc:"Tie-dyed apparel."},
+{name:"Cami’s Dreamland",cat:"Shopping",desc:"Whimsical decor, crystals, vintage clothing."},
+{name:"Window Nation",cat:"Shopping",desc:"Window & door info."},
+{name:"Tangled in Crafts by Ashley",cat:"Shopping",desc:"Bleached tees & sweatshirts, on-site press."},
+{name:"Bright Light Candles",cat:"Shopping",desc:"Candles, wax melts, sprays & more."},
+{name:"Norwin Mini-Thon",cat:"Shopping",desc:"Hot cocoa, face painting & merch."},
+{name:"Calvin Presbyterian Church",cat:"Shopping",desc:"Free kids’ crafts & glow bracelets."},
+{name:"hype and harmony",cat:"Shopping",desc:"Jewelry & clothing."},
+{name:"FYZICAL Therapy & Balance",cat:"Shopping",desc:"STOPAIN sales & therapy info."},
+{name:"Pretend Food Vendor",cat:"Food",desc:"Demo vendor for testing."},
+{name:"Pretend Craft Vendor",cat:"Shopping",desc:"Demo craft vendor for testing."}
+];
+function buildVendorsList(){const l=document.getElementById('vendorList');
+const f=vendorsData.filter(v=>v.cat==="Food"),s=vendorsData.filter(v=>v.cat!=="Food");
+const mk=v=>`<div class='row'><div>${v.name}<span class='badge'>${v.cat}</span><br><small>${v.desc}</small></div>
+<div class='btn-row'><button class='btn' onclick="alert('Location pin coming soon.')">Show on Map</button>
+<button class='btn secondary' onclick="alert('Directions available soon.')">Get Directions</button></div></div>`;
+l.innerHTML=`<h3>Food Vendors</h3>${f.map(mk).join('')}<h3 style='margin-top:14px;'>Shopping & Activities</h3>${s.map(mk).join('')}`;}
+buildVendorsList();
 
-  rows.forEach(r=>{
-    const eventTime=new Date(r.dataset.time);
-    const diff=(eventTime-now)/60000;
-    if(now < new Date("2025-11-20T00:00:00-05:00")){
-      r.style.display="block";r.classList.remove('faded','active-now');return;
-    }
-    if(diff<-15){r.style.display="none";}
-    else if(diff<0){r.classList.add('faded');}
-    else {r.classList.remove('faded');r.style.display="block";if(diff<soonestFuture){soonestFuture=diff;nextUpcoming=r;}}
-  });
-  rows.forEach(r=>r.classList.remove('active-now'));
-  if(nextUpcoming) nextUpcoming.classList.add('active-now');
-}
-updateSchedule();
-setInterval(updateSchedule,60000);
-
-/* --- Search Improvements --- */
-const searchInput=document.getElementById('searchInput');
-const searchResults=document.getElementById('searchResults');
+/* Search */
+const searchInput=document.getElementById('searchInput'),searchResults=document.getElementById('searchResults');
 document.getElementById('searchClear').onclick=()=>{searchInput.value='';renderResults([]);searchInput.focus();};
-
 let allData=[];
 function rebuildSearchIndex(){
-  const locItems = markers.map(m=>({
-    type:m.category,title:m.name,description:m._desc,target:m.name
-  }));
-  const schedEls=[...document.querySelectorAll('#scheduleList .row')];
-  const schedItems=schedEls.map(el=>{
-    const text=el.innerText.trim();
-    const target=el.dataset.target||'';
-    return {type:'Event',title:text,description:text,target};
-  });
-  allData=[...locItems,...schedItems];
+const loc=markers.map(m=>({type:m.category,title:m.name,description:m._desc,target:m.name}));
+const sched=[...document.querySelectorAll('#scheduleList .row')].map(e=>({type:'Event',title:e.innerText,description:e.innerText,target:e.dataset.target||''}));
+const vend=vendorsData.map(v=>({type:v.cat,title:v.name,description:v.desc,target:v.name}));
+allData=[...loc,...vend,...sched];
 }
+function highlight(t,q){if(!q)return t;return t.replace(new RegExp(`(${q})`,'gi'),'<mark>$1</mark>');}
+function renderResults(a,q=''){if(!a.length){searchResults.innerHTML='<div class=result>No results found.</div>';return;}
+searchResults.innerHTML=a.map(i=>`<div class=result><div class=result-title>${highlight(i.title,q)}</div>
+<div class=result-meta>${i.type} — ${highlight(i.description,q)}</div>
+<div class=btn-row><button class=btn onclick="alert('Location pin coming soon.')">Show on Map</button>
+<button class='btn secondary' onclick="alert('Directions available soon.')">Get Directions</button></div></div>`).join('');}
+searchInput.addEventListener('input',()=>{const q=searchInput.value.trim().toLowerCase();if(!q){renderResults([]);return;}
+const terms=q.split(/\s+/);const r=allData.filter(i=>{const h=(i.title+' '+i.description+' '+i.type).toLowerCase();
+return terms.every(t=>h.includes(t));});renderResults(r.slice(0,100),q);});
 
-function highlight(text,q){
-  const regex=new RegExp(`(${q})`,'gi');
-  return text.replace(regex,'<mark>$1</mark>');
-}
-
-function renderResults(items,q=''){
-  if(!items.length){searchResults.innerHTML='<div class="result">No results found.</div>';return;}
-  searchResults.innerHTML = items.map(it=>`
-    <div class="result">
-      <div class="result-title">${highlight(it.title,q)}</div>
-      <div class="result-meta">${it.type} — ${highlight(it.description,q)}</div>
-      <div class="btn-row">
-        <button class="btn" onclick="focusLocation('${it.target.replace(/'/g,"\\'")}')">Show on Map</button>
-        <button class="btn secondary" onclick="routeToByName('${it.target.replace(/'/g,"\\'")}')">Get Directions</button>
-      </div>
-    </div>`).join('');
-}
-
-searchInput.addEventListener('input',()=>{
-  const q=searchInput.value.trim().toLowerCase();
-  if(!q){renderResults([]);return;}
-  const terms=q.split(/\s+/);
-  const results=allData.filter(it=>{
-    const hay=(it.title+' '+it.description+' '+it.type).toLowerCase();
-    return terms.every(t=>hay.includes(t));
-  });
-  renderResults(results.slice(0,50),q);
-});
-
-/* --- Routing --- */
+/* Routing */
 let routeControl=null,userMarker=null,watchId=null,destLatLng=null;
-function routeToByName(name){
-  const m=markers.find(x=>x.name===name);
-  if(!m)return;
-  startRoutingTo(m.getLatLng());
-}
-function startRoutingTo(latlng){
-  destLatLng=L.latLng(latlng);
-  if(!navigator.geolocation){alert('Geolocation not supported');return;}
-  if(!routeControl){
-    routeControl=L.Routing.control({
-      waypoints:[],addWaypoints:false,draggableWaypoints:false,fitSelectedRoutes:true,
-      show:false,
-      router:L.Routing.osrmv1({serviceUrl:'https://router.project-osrm.org/route/v1',profile:'foot'}),
-      lineOptions:{styles:[{color:'#2E6CF6',weight:6,opacity:0.9}]}
-    }).addTo(map);
-  }
-  clearWatch();
-  watchId=navigator.geolocation.watchPosition(pos=>{
-    const here=L.latLng(pos.coords.latitude,pos.coords.longitude);
-    if(!userMarker){userMarker=L.circleMarker(here,{radius:8,color:"#1756ff",fillOpacity:0.9}).addTo(map);}
-    else{userMarker.setLatLng(here);}
-    routeControl.setWaypoints([here,destLatLng]);
-    document.getElementById('routeActions').classList.add('show');
-    const dist=map.distance(here,destLatLng);
-    if(dist<=50){fadeOutRouteThenEnd();}
-  });
-}
-function fadeOutRouteThenEnd(){
-  const line=routeControl && routeControl._line ? routeControl._line : null;
-  if(line&&line.setStyle){
-    let op=0.9;
-    const f=setInterval(()=>{op-=0.18;if(op<=0){clearInterval(f);endRouting();}else{line.setStyle({opacity:op});}},120);
-  } else endRouting();
-}
-function endRouting(){
-  clearWatch();
-  if(routeControl){try{routeControl.setWaypoints([]);}catch(e){}}
-  if(userMarker){map.removeLayer(userMarker);userMarker=null;}
-  destLatLng=null;document.getElementById('routeActions').classList.remove('show');
-}
+function routeToByName(n){const m=markers.find(x=>x.name===n);if(m)startRoutingTo(m.getLatLng());}
+function startRoutingTo(l){destLatLng=L.latLng(l);
+if(!navigator.geolocation){alert('Geolocation not supported');return;}
+if(!routeControl){routeControl=L.Routing.control({waypoints:[],addWaypoints:false,draggableWaypoints:false,fitSelectedRoutes:true,show:false,
+router:L.Routing.osrmv1({serviceUrl:'https://router.project-osrm.org/route/v1',profile:'foot'}),
+lineOptions:{styles:[{color:'#2E6CF6',weight:6,opacity:.9}]}}).addTo(map);}
+clearWatch();watchId=navigator.geolocation.watchPosition(p=>{const h=L.latLng(p.coords.latitude,p.coords.longitude);
+if(!userMarker){userMarker=L.circleMarker(h,{radius:8,color:"#1756ff",fillOpacity:.9}).addTo(map);}else{userMarker.setLatLng(h);}
+routeControl.setWaypoints([h,destLatLng]);document.getElementById('routeActions').classList.add('show');
+const d=map.distance(h,destLatLng);if(d<=50){fadeOutRouteThenEnd();}});}
+function fadeOutRouteThenEnd(){const l=routeControl&&routeControl._line?routeControl._line:null;
+if(l&&l.setStyle){let o=.9;const f=setInterval(()=>{o-=.18;if(o<=0){clearInterval(f);endRouting();}else{l.setStyle({opacity:o});}},120);}else endRouting();}
+function endRouting(){clearWatch();if(routeControl){try{routeControl.setWaypoints([]);}catch(e){}}
+if(userMarker){map.removeLayer(userMarker);userMarker=null;}destLatLng=null;document.getElementById('routeActions').classList.remove('show');}
 function clearWatch(){if(watchId!==null){navigator.geolocation.clearWatch(watchId);watchId=null;}}
 document.getElementById('cancelRoute').onclick=endRouting;
 </script>
-
 </body>
 </html>
