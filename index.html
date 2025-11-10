@@ -122,6 +122,9 @@ body{
   z-index:5;
 }
 .overlay.active{opacity:1;visibility:visible;}
+
+/* Map dark filter for night mode */
+#map.leaflet-container.night {filter: invert(1) hue-rotate(180deg) brightness(0.8);}
 </style>
 </head>
 
@@ -234,7 +237,7 @@ overlay.onclick=hidePanels;
 map.on('click',hidePanels);
 navItems.forEach(i=>i.addEventListener('click',()=>togglePanel(i.dataset.view)));
 
-/* --- Updated Schedule Behavior --- */
+/* --- Schedule Fade Logic --- */
 function updateSchedule(){
   const now=new Date();
   const rows=document.querySelectorAll('#scheduleList .row');
@@ -244,14 +247,11 @@ function updateSchedule(){
     const eventTime=new Date(r.dataset.time);
     const diff=(eventTime-now)/60000;
 
-    // Always show before the event day
     if(now<new Date("2025-11-20T00:00:00-05:00")) {
       r.style.display="block";
       r.classList.remove('faded','active-now');
       return;
     }
-
-    // Fade and hide on Nov 20 as times pass
     if(diff<-15){r.style.display="none";}
     else if(diff<0){r.classList.add('faded');r.classList.remove('active-now');}
     else {r.classList.remove('faded');r.style.display="block";if(diff<soonestFuture){soonestFuture=diff;nextUpcoming=r;}}
@@ -262,6 +262,16 @@ function updateSchedule(){
 }
 updateSchedule();
 setInterval(updateSchedule,60000);
+
+/* --- Auto Day/Night Theme --- */
+function updateMapTheme(){
+  const hour=new Date().getHours();
+  const mapContainer=document.querySelector('#map.leaflet-container');
+  if(hour>=17||hour<6){mapContainer.classList.add('night');}
+  else{mapContainer.classList.remove('night');}
+}
+updateMapTheme();
+setInterval(updateMapTheme,600000); // check every 10 minutes
 </script>
 </body>
 </html>
