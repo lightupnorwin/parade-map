@@ -165,7 +165,10 @@ body{
   </div>
   <div class="scroll-inner">
     <div class="card" id="scheduleList">
-      <div class="row" data-time="2025-11-20T17:00:00-05:00" data-target="Main Street Stage"><strong>5:00 PM</strong> – East End Kids<span class="badge">Event</span></div>
+            <div class="row" data-time="ALWAYS" data-target="Shidle Lodge Food Tent">
+        50/50 Ticket Raffle at Shidle Lodge (415 Main St)
+        <span class="badge">Event</span>
+       <div class="row" data-time="2025-11-20T17:00:00-05:00" data-target="Main Street Stage"><strong>5:00 PM</strong> – East End Kids<span class="badge">Event</span></div>
       <div class="row" data-time="2025-11-20T17:30:00-05:00" data-target="Main Street Stage"><strong>5:30 PM</strong> – Main Street Music Students<span class="badge">Event</span></div>
       <div class="row" data-time="2025-11-20T18:00:00-05:00" data-target="Main Street Stage"><strong>6:00 PM</strong> – C.P. Music<span class="badge">Event</span></div>
       <div class="row" data-time="2025-11-20T18:30:00-05:00" data-target="Tree Lighting"><strong>6:30 PM</strong> – Parade Begins! <em>(Rick Sebak of WQED serves as MC)</em><span class="badge">Parade</span></div>
@@ -268,7 +271,10 @@ const vendorPins = [
   {position:[40.3310632,-79.7110046],name:"Hype and Harmony",description:"Jewelry & clothing.",category:"Shopping"},
   {position:[40.3311279,-79.7111954],name:"The Rustic Roamer Coffee",description:"Specialty coffee & baked goods.",category:"Food"},
   {position:[40.3311460,-79.7114948],name:"Zack Poole",description:"Local artisan & crafts.",category:"Shopping"},
-  {position:[40.3310466,-79.7115139],name:"A & A Novelties",description:"Light-up toys & Christmas novelties.",category:"Shopping"}
+  {position:[40.3310466,-79.7115139],name:"A & A Novelties",description:"Light-up toys & Christmas novelties.",category:"Shopping"},
+  // --- Shidle Lodge Vendors near Restrooms ---
+  {position:[40.331495,-79.71088],name:"Shidle Lodge Food Tent",description:"Hot Dogs, Hot Sausage, Hot Chocolate.",category:"Food"},
+  {position:[40.331505,-79.71085],name:"Shidle Lodge Craft Tent",description:"Selling handcrafted ornaments.",category:"Shopping"}
 ];
 
 const markers=[];
@@ -306,11 +312,51 @@ overlay.onclick=hidePanels;map.on('click',hidePanels);
 navItems.forEach(i=>i.addEventListener('click',()=>togglePanel(i.dataset.view)));
 
 // Schedule highlighting
-function updateSchedule(){const n=new Date(),r=document.querySelectorAll('#scheduleList .row');let a=null,s=1/0;
-r.forEach(e=>{const t=new Date(e.dataset.time),d=(t-n)/6e4;if(n<new Date("2025-11-20T00:00:00-05:00")){e.style.display="block";e.classList.remove('faded','active-now');return;}
-if(d<-15)e.style.display="none";else if(d<0)e.classList.add('faded');else{e.classList.remove('faded');e.style.display="block";if(d<s){s=d;a=e;}}});
-r.forEach(e=>e.classList.remove('active-now'));if(a)a.classList.add('active-now');}
-updateSchedule();setInterval(updateSchedule,6e4);
+function updateSchedule() {
+  const n = new Date();
+  const r = document.querySelectorAll('#scheduleList .row');
+  let a = null, s = 1/0;
+
+  r.forEach(e => {
+    const timeAttr = e.dataset.time;
+
+    // Keep ALWAYS events visible all night
+    if (timeAttr === "ALWAYS") {
+      e.style.display = "block";
+      e.classList.remove('faded', 'active-now');
+      return;
+    }
+
+    const t = new Date(timeAttr);
+    const d = (t - n) / 6e4;
+
+    if (n < new Date("2025-11-20T00:00:00-05:00")) {
+      e.style.display = "block";
+      e.classList.remove('faded', 'active-now');
+      return;
+    }
+
+    if (d < -15) {
+      e.style.display = "none";
+    } else if (d < 0) {
+      e.classList.add('faded');
+    } else {
+      e.classList.remove('faded');
+      e.style.display = "block";
+      if (d < s) {
+        s = d;
+        a = e;
+      }
+    }
+  });
+
+  r.forEach(e => e.classList.remove('active-now'));
+  if (a) a.classList.add('active-now');
+}
+
+updateSchedule();
+setInterval(updateSchedule, 6e4);
+
 
 /* Vendors panel list */
 const vendorsData = vendorPins.map(v=>({name:v.name,cat:v.category,desc:v.description}));
