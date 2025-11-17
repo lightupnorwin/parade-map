@@ -31,33 +31,13 @@ body{
   display:flex;justify-content:space-around;align-items:center;
   box-shadow:0 2px 8px rgba(0,0,0,0.15);
   border-bottom:1px solid #ddd;z-index:15;
-  padding-top:env(safe-area-inset-top,0);
 }
 .nav-item{
   flex:1;text-align:center;cursor:pointer;
-  font-weight:600;color:#333;
-  transition:color .2s,font-size .2s;
-  font-size:16px;min-height:44px;
+  font-weight:600;color:#333;font-size:16px;min-height:44px;
 }
 .nav-item span{display:block;font-size:26px;margin-bottom:2px;}
 .nav-item.active{color:var(--brand);text-shadow:0 0 6px rgba(23,86,255,0.35);}
-
-/* --- Map buttons --- */
-.map-actions{position:absolute;top:92px;right:20px;display:flex;flex-direction:column;gap:10px;z-index:12;}
-.map-actions button{
-  background:#fff;border:none;border-radius:50%;
-  width:52px;height:52px;font-size:26px;cursor:pointer;
-  box-shadow:0 2px 8px rgba(0,0,0,0.3);
-  transition:transform .15s ease;
-}
-.map-actions button:active{transform:scale(0.95);}
-.route-actions{position:absolute;top:92px;left:20px;z-index:12;display:none;}
-.route-actions .cancel{
-  background:#fff;border:none;border-radius:999px;
-  padding:12px 18px;font-weight:700;font-size:17px;
-  box-shadow:0 2px 8px rgba(0,0,0,.3);cursor:pointer;
-}
-.route-actions.show{display:block;}
 
 /* --- Panels --- */
 .view{
@@ -65,9 +45,8 @@ body{
   width:92%;max-width:640px;background:var(--panel-bg);
   border-top-left-radius:16px;border-top-right-radius:16px;
   box-shadow:0 -3px 15px rgba(0,0,0,0.25);
-  display:flex;flex-direction:column;
-  max-height:70vh;overflow:hidden;
-  transition:transform 0.35s cubic-bezier(.25,.8,.25,1);
+  display:flex;flex-direction:column;max-height:70vh;
+  overflow:hidden;transition:transform 0.35s cubic-bezier(.25,.8,.25,1);
   z-index:10;backdrop-filter:blur(8px);
   pointer-events:none;visibility:hidden;
 }
@@ -75,73 +54,48 @@ body{
   transform:translate(-50%,0);
   pointer-events:auto;visibility:visible;z-index:20;
 }
-
-/* --- Panel header --- */
 .view-header{
   position:sticky;top:0;background:var(--panel-bg);
   display:flex;align-items:center;justify-content:space-between;
   padding:18px 22px 12px;border-bottom:1px solid rgba(0,0,0,0.1);
-  z-index:25;
 }
 .view-header h1{
   margin:0;font-size:22px;font-weight:700;
-  display:flex;align-items:center;gap:8px;
 }
 .close-btn{
-  border:none;background:rgba(255,255,255,0.95);color:#000;
-  font-size:22px;font-weight:bold;border-radius:50%;
+  border:none;background:#fff;color:#000;font-size:22px;
+  font-weight:bold;border-radius:50%;
   width:40px;height:40px;cursor:pointer;
-  box-shadow:0 2px 8px rgba(0,0,0,0.3);flex-shrink:0;
+  box-shadow:0 2px 8px rgba(0,0,0,0.3);
 }
-.close-btn:active{transform:scale(0.95);}
 .scroll-inner{flex:1;overflow-y:auto;padding:14px 22px 100px;}
-
-/* --- Content --- */
-.card{background:transparent;}
 .row{padding:14px 0;border-top:1px solid rgba(0,0,0,0.1);}
 .row:first-child{border-top:none;}
-.row strong{font-size:17px;}
 .btn{
   background:var(--brand);color:#fff;
   padding:10px 14px;border:none;border-radius:10px;
   cursor:pointer;font-weight:600;font-size:16px;min-height:44px;
 }
-.btn:active{transform:scale(0.97);}
 .btn.secondary{background:#e9ecf7;color:#122;}
 .btn:hover{opacity:.9;}
+.btn-row{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end;margin-top:8px;}
 .badge{
   display:inline-block;background:#eef3ff;color:#245;
   font-weight:700;border-radius:999px;
   padding:3px 9px;margin-left:6px;font-size:13px;
 }
-.btn-row{
-  display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end;margin-top:8px;
-}
-@media(max-width:480px){
-  .btn-row{flex-direction:column;align-items:stretch}
-  .btn-row .btn{width:100%}
-}
-
-/* --- Overlay & search --- */
 .overlay{position:fixed;top:0;left:0;width:100%;height:100%;
   background:rgba(0,0,0,0.25);opacity:0;visibility:hidden;
   transition:opacity .25s;z-index:5;}
 .overlay.active{opacity:1;visibility:visible;}
-
-.search-tray{
-  position:fixed;top:72px;left:0;width:100%;background:#fff;
-  border-bottom:1px solid #ddd;z-index:14;
-  transform:translateY(-110%);
-  transition:transform .25s ease;
-  box-shadow:0 2px 10px rgba(0,0,0,0.1);
-}
+.search-tray{position:fixed;top:72px;left:0;width:100%;background:#fff;
+  border-bottom:1px solid #ddd;z-index:14;transform:translateY(-110%);
+  transition:transform .25s ease;box-shadow:0 2px 10px rgba(0,0,0,0.1);}
 .search-tray.active{transform:translateY(0);}
 .search-inner{padding:12px 14px 16px;}
 .search-bar{display:flex;gap:10px;}
-.search-input{
-  flex:1;border:1px solid #ddd;border-radius:12px;
-  padding:12px 14px;font-size:17px;outline:none;
-}
+.search-input{flex:1;border:1px solid #ddd;border-radius:12px;
+  padding:12px 14px;font-size:17px;outline:none;}
 .search-results{max-height:50vh;overflow:auto;margin-top:10px;}
 .result{padding:12px;border-top:1px solid #eee;}
 .result-title{font-weight:700;font-size:17px;}
@@ -154,79 +108,18 @@ body{
 <body>
 <div id="map"></div>
 <div class="overlay" id="overlay"></div>
-<div class="map-actions"><button id="locateMe" title="Use my location">📍</button></div>
-<div class="route-actions" id="routeActions"><button class="cancel" id="cancelRoute">Cancel Directions</button></div>
 
-<!-- Panels -->
-<div id="view-schedule" class="view">
-  <div class="view-header">
-    <h1>📅 Schedule</h1>
-    <button class="close-btn" onclick="hidePanels()">✕</button>
-  </div>
-  <div class="scroll-inner">
-    <div class="card" id="scheduleList">
-      <div class="row" data-time="ALWAYS" data-target="Shidle Lodge Food">
-        50/50 Ticket Raffle at Shidle Lodge (415 Main St)
-        <span class="badge">Event</span>
-      </div>
-      <div class="row" data-time="2025-11-20T17:00:00-05:00" data-target="Main Street Stage">
-        <strong>5:00 PM</strong> – East End Kids
-        <span class="badge">Event</span>
-      </div>
-      <div class="row" data-time="2025-11-20T17:30:00-05:00" data-target="Main Street Stage">
-        <strong>5:30 PM</strong> – Main Street Music Students
-        <span class="badge">Event</span>
-      </div>
-      <div class="row" data-time="2025-11-20T18:00:00-05:00" data-target="Main Street Stage">
-        <strong>6:00 PM</strong> – C.P. Music
-        <span class="badge">Event</span>
-      </div>
-      <div class="row" data-time="2025-11-20T18:30:00-05:00" data-target="Tree Lighting">
-        <strong>6:30 PM</strong> – Parade Begins! <em>(Rick Sebak of WQED serves as MC)</em>
-        <span class="badge">Parade</span>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-<div id="view-vendors" class="view">
-  <div class="view-header">
-    <h1>🍔 Food & Shopping</h1>
-    <button class="close-btn" onclick="hidePanels()">✕</button>
-  </div>
-  <div class="scroll-inner">
-    <div class="card" id="vendorList"></div>
-  </div>
-</div>
-
+<!-- Restrooms Panel -->
 <div id="view-restrooms" class="view">
   <div class="view-header">
     <h1>🚻 Restrooms</h1>
     <button class="close-btn" onclick="hidePanels()">✕</button>
   </div>
-  <div class="scroll-inner">
-    <div class="card">
-      <div class="row"><div>415 Main St (Public)<span class="badge">Restroom</span></div>
-        <div class="btn-row">
-          <button class="btn" onclick="focusLocation('Restrooms')">Show on Map</button>
-          <button class="btn secondary" onclick="routeToByName('Restrooms')">Get Directions</button>
-        </div>
-      </div>
-      <div class="row"><div>Portable Units — S&amp;T Bank Plaza<span class="badge">Restroom</span></div>
-        <div class="btn-row">
-          <button class="btn" onclick="focusLocation('Tree Lighting')">Show on Map</button>
-          <button class="btn secondary" onclick="routeToByName('Tree Lighting')">Get Directions</button>
-        </div>
-      </div>
-    </div>
-  </div>
+  <div class="scroll-inner" id="restroomList"></div>
 </div>
 
 <!-- Top Nav -->
 <nav class="top-nav">
-  <div class="nav-item" data-view="schedule"><span>📅</span>Schedule</div>
-  <div class="nav-item" data-view="vendors"><span>🍔</span>Vendors</div>
   <div class="nav-item" data-view="restrooms"><span>🚻</span>Restrooms</div>
   <div class="nav-item" data-view="search"><span>🔎</span>Search</div>
 </nav>
@@ -235,202 +128,117 @@ body{
 <div class="search-tray" id="searchTray">
   <div class="search-inner">
     <div class="search-bar">
-      <input id="searchInput" class="search-input" type="text" placeholder="Search vendors, restrooms, events…" autofocus>
+      <input id="searchInput" class="search-input" type="text" placeholder="Search restrooms, vendors, events…" autofocus>
       <button id="searchClear" class="btn secondary" type="button">Clear</button>
     </div>
     <div id="searchResults" class="search-results"></div>
   </div>
 </div>
 
-<!-- JS imports -->
-
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
 <script>
-const map = L.map('map',{zoomControl:true}).setView([40.332,-79.7105],18);
+const map = L.map('map',{zoomControl:true}).setView([40.3318,-79.7106],18);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:20}).addTo(map);
-const colors={Restrooms:"#007aff",Events:"#ff3b30",Food:"#34c759",Shopping:"#af52de"};
+
+const colors={Restrooms:"#007aff"};
 function makeIcon(e,c){
   const s=encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'><circle cx='20' cy='20' r='18' fill='${c}'/><text x='50%' y='55%' font-size='18' text-anchor='middle' fill='white'>${e}</text></svg>`);
   return L.icon({iconUrl:"data:image/svg+xml,"+s,iconSize:[30,30],iconAnchor:[15,30],popupAnchor:[0,-28]});
 }
-const icons={Restrooms:makeIcon("🚻",colors.Restrooms),Events:makeIcon("🎄",colors.Events),Food:makeIcon("🍔",colors.Food),Shopping:makeIcon("🛍️",colors.Shopping)};
+const icons={Restrooms:makeIcon("🚻",colors.Restrooms)};
 
-const basePins=[
-  {position:[40.3314911,-79.7107],name:"Restrooms",description:"Public restrooms at Shidle Lodge.",category:"Restrooms"},
-  {position:[40.3311033,-79.7107160], name:"Portable Restrooms", description:"Portable Restroom", category:"Restrooms"},
-  {position:[40.3326348,-79.7100816], name:"Portable Restrooms", description:"Portable Restroom", category:"Restrooms"},
-  {position:[40.332795,-79.710338],name:"Tree Lighting",description:"S&T Bank Plaza.",category:"Events"},
-  {position:[40.332008,-79.711068],name:"Main Street Stage",description:"Live performances all evening.",category:"Events"}
-];
-
-const vendorPins = [
-  {position:[40.3319038,-79.7104142],name:"PGH Crêpes",description:"Crêpes, fries & lemonade.",category:"Food"},
-  {position:[40.3319225,-79.7105031],name:"Carmine’s Pizza Neapolitana",description:"Artisan pizza by the slice & whole.",category:"Food"},
-  {position:[40.3319613,-79.7106050],name:"Hoshi Food Truck",description:"Japanese Hibachi.",category:"Food"},
-  {position:[40.3320020,-79.7107716],name:"Travelin’ Tom’s Coffee Truck",description:"Espresso, chai, hot chocolate, refreshers.",category:"Food"},
-  {position:[40.3318563,-79.7104488],name:"Hermès Food Truck",description:"Gyros, burgers, tenders, fries, cheesesticks, baklava, fried Oreos.",category:"Food"},
-  {position:[40.3318798,-79.7105554],name:"Truckin’ Triangles",description:"Stuffed triangles with assorted meats.",category:"Food"},
-  {position:[40.3319066,-79.7106754],name:"WPF Concessions",description:"Wings, bites, pizza muffins, fries, nachos, soda & water.",category:"Food"},
-  {position:[40.3319376,-79.7107961],name:"Courtyard Specialities",description:"Funnel cakes, fried Oreos, corn dogs, pretzels.",category:"Food"},
-  {position:[40.3325906,-79.7101336],name:"High on the Hog",description:"BBQ favorites.",category:"Food"},
-  {position:[40.3325712,-79.7102157],name:"Mutiny Donuts",description:"Fresh donuts made on site.",category:"Food"},
-  {position:[40.3326215,-79.7103576],name:"Calvin Presbyterian Church",description:"Free kids’ crafts & glow bracelets.",category:"Shopping"},
-  {position:[40.3327161,-79.7105041],name:"Live! Casino Pittsburgh",description:"Promo items & literature.",category:"Shopping"},
-  {position:[40.3326836,-79.7101262],name:"Norwin Mini-Thon",description:"Hot cocoa, face painting & merch.",category:"Shopping"},
-  {position:[40.3327340,-79.7103750],name:"Saunders Heating & AC, LLC",description:"HVAC info & giveaways.",category:"Shopping"},
-  {position:[40.3312196,-79.7111481],name:"Millie’s Homemade Ice Cream",description:"Ice cream treats.",category:"Food"},
-  {position:[40.3311514,-79.7110409],name:"Fox’s Pizza North Huntingdon",description:"Pizza, drinks, cookies, light-up toys.",category:"Food"},
-  {position:[40.3311430,-79.7108390],name:"Cami’s Dreamland",description:"Whimsical décor, crystals, vintage clothing.",category:"Shopping"},
-  {position:[40.3311212,-79.7107485],name:"FYZICAL Therapy & Balance Centers",description:"STOPAIN sales & therapy info.",category:"Shopping"},
-  {position:[40.3310267,-79.7108169],name:"Window Nation",description:"Window & door information.",category:"Shopping"},
-  {position:[40.3310632,-79.7110046],name:"Hype and Harmony",description:"Jewelry & clothing.",category:"Shopping"},
-  {position:[40.3311279,-79.7111954],name:"The Rustic Roamer Coffee",description:"Specialty coffee & baked goods.",category:"Food"},
-  {position:[40.3311460,-79.7114948],name:"Zack Poole",description:"Local artisan & crafts.",category:"Shopping"},
-  {position:[40.3310466,-79.7115139],name:"A & A Novelties",description:"Light-up toys & Christmas novelties.",category:"Shopping"},
-  // --- Shidle Lodge Vendors near Restrooms ---
-  {position:[40.331495,-79.71088],name:"Shidle Lodge Food",description:"Hot Dogs, Hot Sausage, Hot Chocolate.",category:"Food"},
-  {position:[40.331505,-79.71080],name:"Shidle Lodge Crafts",description:"Selling handcrafted ornaments.",category:"Shopping"}
+// === Pins ===
+const restrooms = [
+  {position:[40.330953,-79.710651], name:"Restrooms – Shidle Lodge", description:"Indoor restrooms inside Shidle Lodge at 415 Main St.", category:"Restrooms"},
+  {position:[40.3311033,-79.7107160], name:"Portable Restroom – 5th St Lot", description:"Portable restroom units located in the 5th Street Lot.", category:"Restrooms"},
+  {position:[40.3326348,-79.7100816], name:"Portable Restroom – 3rd St Lot", description:"Portable restroom units located in the 3rd Street Lot.", category:"Restrooms"}
 ];
 
 const markers=[];
-[...basePins,...vendorPins].forEach(l=>{
+restrooms.forEach(l=>{
   const popup = `<b>${l.name}</b><br>${l.description}<br>
     <div class='btn-row'>
-      <button class='btn secondary' onclick="routeToByName('${l.name}')">Get Directions</button>
+      <button class='btn' onclick=\"focusLocation('${l.name}')\">Show on Map</button>
+      <button class='btn secondary' onclick=\"routeToByName('${l.name}')\">Get Directions</button>
     </div>`;
   const m=L.marker(l.position,{icon:icons[l.category]}).bindPopup(popup).addTo(map);
-  m.name=l.name;m.category=l.category;m._desc=l.description;m._hasCoords=true;markers.push(m);
+  m.name=l.name;m.category=l.category;m._desc=l.description;markers.push(m);
 });
 map.fitBounds(L.featureGroup(markers).getBounds(),{padding:[40,40]});
 
-// Focus
-function focusLocation(n){const m=markers.find(x=>x.name===n);if(m){hidePanels();map.setView(m.getLatLng(),19);m.openPopup();}}
+// === Restroom list panel ===
+function buildRestroomList(){
+  const l=document.getElementById('restroomList');
+  const mk=v=>`<div class='row'><div>${v.name}<span class='badge'>${v.category}</span><br><small>${v.description}</small></div>
+    <div class='btn-row'>
+      <button class='btn' onclick=\"focusLocation('${v.name}')\">Show on Map</button>
+      <button class='btn secondary' onclick=\"routeToByName('${v.name}')\">Get Directions</button>
+    </div></div>`;
+  l.innerHTML=restrooms.map(mk).join('');
+}
+buildRestroomList();
 
-// Locate Me
-document.getElementById("locateMe").onclick=()=>navigator.geolocation?.getCurrentPosition(p=>{
-  map.setView([p.coords.latitude,p.coords.longitude],18);
-  L.circleMarker([p.coords.latitude,p.coords.longitude],{radius:8,color:"#1756ff",fillOpacity:.9})
-    .addTo(map).bindPopup("You are here").openPopup();
-});
-
-// Panel nav & overlay logic
-const navItems=document.querySelectorAll('.nav-item'),panels=document.querySelectorAll('.view'),
-overlay=document.getElementById('overlay'),searchTray=document.getElementById('searchTray');let current=null;
-function hidePanels(){panels.forEach(v=>v.classList.remove('active'));navItems.forEach(n=>n.classList.remove('active'));
+// === Panels ===
+const navItems=document.querySelectorAll('.nav-item'),
+overlay=document.getElementById('overlay'),
+searchTray=document.getElementById('searchTray');let current=null;
+function hidePanels(){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+navItems.forEach(n=>n.classList.remove('active'));
 overlay.classList.remove('active');searchTray.classList.remove('active');current=null;}
-function togglePanel(v){if(v==='search'){const o=searchTray.classList.contains('active');hidePanels();
-if(!o){rebuildSearchIndex();searchTray.classList.add('active');document.querySelector('.nav-item[data-view=\"search\"]').classList.add('active');
-overlay.classList.add('active');setTimeout(()=>document.getElementById('searchInput').focus(),50);current='search';}return;}
-if(current===v){hidePanels();return;}hidePanels();document.getElementById('view-'+v).classList.add('active');
-document.querySelector(`.nav-item[data-view=\"${v}\"]`).classList.add('active');overlay.classList.add('active');current=v;}
+function togglePanel(v){
+  if(v==='search'){const open=searchTray.classList.contains('active');hidePanels();
+    if(!open){rebuildSearchIndex();searchTray.classList.add('active');
+    document.querySelector('.nav-item[data-view=\"search\"]').classList.add('active');
+    overlay.classList.add('active');setTimeout(()=>document.getElementById('searchInput').focus(),50);
+    current='search';}return;}
+  if(current===v){hidePanels();return;}
+  hidePanels();
+  document.getElementById('view-'+v).classList.add('active');
+  document.querySelector(`.nav-item[data-view=\"${v}\"]`).classList.add('active');
+  overlay.classList.add('active');current=v;
+}
 overlay.onclick=hidePanels;map.on('click',hidePanels);
 navItems.forEach(i=>i.addEventListener('click',()=>togglePanel(i.dataset.view)));
 
-// Schedule highlighting
-function updateSchedule() {
-  const n = new Date();
-  const r = document.querySelectorAll('#scheduleList .row');
-  let a = null, s = 1/0;
+// === Focus ===
+function focusLocation(n){const m=markers.find(x=>x.name===n);
+  if(m){hidePanels();map.setView(m.getLatLng(),19);m.openPopup();}}
 
-  r.forEach(e => {
-    const timeAttr = e.dataset.time;
-
-    // Keep ALWAYS events visible all night
-    if (timeAttr === "ALWAYS") {
-      e.style.display = "block";
-      e.classList.remove('faded', 'active-now');
-      return;
-    }
-
-    const t = new Date(timeAttr);
-    const d = (t - n) / 6e4;
-
-    if (n < new Date("2025-11-20T00:00:00-05:00")) {
-      e.style.display = "block";
-      e.classList.remove('faded', 'active-now');
-      return;
-    }
-
-    if (d < -15) {
-      e.style.display = "none";
-    } else if (d < 0) {
-      e.classList.add('faded');
-    } else {
-      e.classList.remove('faded');
-      e.style.display = "block";
-      if (d < s) {
-        s = d;
-        a = e;
-      }
-    }
-  });
-
-  r.forEach(e => e.classList.remove('active-now'));
-  if (a) a.classList.add('active-now');
-}
-
-updateSchedule();
-setInterval(updateSchedule, 6e4);
-
-
-/* Vendors panel list */
-const vendorsData = vendorPins.map(v=>({name:v.name,cat:v.category,desc:v.description}));
-function buildVendorsList(){
-  const l=document.getElementById('vendorList');
-  const f=vendorsData.filter(v=>v.cat==="Food"),s=vendorsData.filter(v=>v.cat!=="Food");
-  const mk=v=>`<div class='row'><div>${v.name}<span class='badge'>${v.cat}</span><br><small>${v.desc}</small></div>
-    <div class='btn-row'>
-      <button class='btn' onclick="focusLocation('${v.name}')">Show on Map</button>
-      <button class='btn secondary' onclick="routeToByName('${v.name}')">Get Directions</button>
-    </div></div>`;
-  l.innerHTML=`<h3>Food Vendors</h3>${f.map(mk).join('')}<h3 style='margin-top:14px;'>Shopping & Activities</h3>${s.map(mk).join('')}`;
-}
-buildVendorsList();
-
-/* Search */
+// === Search ===
 const searchInput=document.getElementById('searchInput'),searchResults=document.getElementById('searchResults');
 document.getElementById('searchClear').onclick=()=>{searchInput.value='';renderResults([]);searchInput.focus();};
 let allData=[];
-function rebuildSearchIndex(){
-  const loc=markers.map(m=>({type:m.category,title:m.name,description:m._desc,target:m.name}));
-  const sched=[...document.querySelectorAll('#scheduleList .row')].map(e=>({type:'Event',title:e.innerText,description:e.innerText,target:e.dataset.target||''}));
-  const vend=vendorsData.map(v=>({type:v.cat,title:v.name,description:v.desc,target:v.name}));
-  allData=[...loc,...vend,...sched];
-}
+function rebuildSearchIndex(){allData=markers.map(m=>({type:m.category,title:m.name,description:m._desc,target:m.name}));}
 function highlight(t,q){if(!q)return t;return t.replace(new RegExp(`(${q})`,'gi'),'<mark>$1</mark>');}
 function renderResults(a,q=''){if(!a.length){searchResults.innerHTML='<div class=result>No results found.</div>';return;}
 searchResults.innerHTML=a.map(i=>`<div class=result><div class=result-title>${highlight(i.title,q)}</div>
   <div class=result-meta>${i.type} — ${highlight(i.description,q)}</div>
-  <div class=btn-row><button class=btn onclick="focusLocation('${i.title}')">Show on Map</button>
-  <button class='btn secondary' onclick="routeToByName('${i.title}')">Get Directions</button></div></div>`).join('');}
-searchInput.addEventListener('input',()=>{const q=searchInput.value.trim().toLowerCase();if(!q){renderResults([]);return;}
-const terms=q.split(/\s+/);const r=allData.filter(i=>{const h=(i.title+' '+i.description+' '+i.type).toLowerCase();return terms.every(t=>h.includes(t));});
+  <div class=btn-row><button class=btn onclick=\"focusLocation('${i.title}')\">Show on Map</button>
+  <button class='btn secondary' onclick=\"routeToByName('${i.title}')\">Get Directions</button></div></div>`).join('');}
+searchInput.addEventListener('input',()=>{const q=searchInput.value.trim().toLowerCase();
+if(!q){renderResults([]);return;}
+const terms=q.split(/\\s+/);
+const r=allData.filter(i=>{const h=(i.title+' '+i.description+' '+i.type).toLowerCase();return terms.every(t=>h.includes(t));});
 renderResults(r.slice(0,100),q);});
 
-/* Routing */
+// === Routing ===
 let routeControl=null,userMarker=null,watchId=null,destLatLng=null;
-function routeToByName(n){const m=markers.find(x=>x.name===n);if(m)startRoutingTo(m.getLatLng());}
+function routeToByName(n){const m=markers.find(x=>x.name===n);
+  if(m)startRoutingTo(m.getLatLng());}
 function startRoutingTo(l){destLatLng=L.latLng(l);
-if(!navigator.geolocation){alert('Geolocation not supported');return;}
-if(!routeControl){routeControl=L.Routing.control({waypoints:[],addWaypoints:false,draggableWaypoints:false,fitSelectedRoutes:true,show:false,
-router:L.Routing.osrmv1({serviceUrl:'https://router.project-osrm.org/route/v1',profile:'foot'}),
-lineOptions:{styles:[{color:'#2E6CF6',weight:6,opacity:.9}]}}).addTo(map);}
-clearWatch();watchId=navigator.geolocation.watchPosition(p=>{const h=L.latLng(p.coords.latitude,p.coords.longitude);
-if(!userMarker){userMarker=L.circleMarker(h,{radius:8,color:"#1756ff",fillOpacity:.9}).addTo(map);}else{userMarker.setLatLng(h);}
-routeControl.setWaypoints([h,destLatLng]);document.getElementById('routeActions').classList.add('show');
-const d=map.distance(h,destLatLng);if(d<=50){fadeOutRouteThenEnd();}});}
-function fadeOutRouteThenEnd(){const l=routeControl&&routeControl._line?routeControl._line:null;
-if(l&&l.setStyle){let o=.9;const f=setInterval(()=>{o-=.18;if(o<=0){clearInterval(f);endRouting();}else{l.setStyle({opacity:o});}},120);}else endRouting();}
-function endRouting(){clearWatch();if(routeControl){try{routeControl.setWaypoints([]);}catch(e){}}
-if(userMarker){map.removeLayer(userMarker);userMarker=null;}destLatLng=null;document.getElementById('routeActions').classList.remove('show');}
+  if(!navigator.geolocation){alert('Geolocation not supported');return;}
+  if(!routeControl){routeControl=L.Routing.control({waypoints:[],addWaypoints:false,draggableWaypoints:false,fitSelectedRoutes:true,show:false,
+  router:L.Routing.osrmv1({serviceUrl:'https://router.project-osrm.org/route/v1',profile:'foot'}),
+  lineOptions:{styles:[{color:'#2E6CF6',weight:6,opacity:.9}]}}).addTo(map);}
+  clearWatch();
+  watchId=navigator.geolocation.watchPosition(p=>{
+    const h=L.latLng(p.coords.latitude,p.coords.longitude);
+    if(!userMarker){userMarker=L.circleMarker(h,{radius:8,color:'#1756ff',fillOpacity:.9}).addTo(map);}else{userMarker.setLatLng(h);}
+    routeControl.setWaypoints([h,destLatLng]);
+  });
+}
 function clearWatch(){if(watchId!==null){navigator.geolocation.clearWatch(watchId);watchId=null;}}
-document.getElementById('cancelRoute').onclick=endRouting;
 </script>
-
-
- 
-
-  
 </body>
 </html>
