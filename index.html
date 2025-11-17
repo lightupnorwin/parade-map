@@ -286,14 +286,15 @@ const vendorPins = [
   {position:[40.3325906,-79.7101336],name:"High on the Hog",description:"BBQ favorites.",category:"Food"},
   {position:[40.3325712,-79.7102157],name:"Mutiny Donuts",description:"Fresh donuts made on site.",category:"Food"},
 
-  /* Updated vendor coordinates + SpectroDolce */
-  {position:[40.3312148,-79.7110603],name:"Cami’s Dreamland",description:"Whimsical décor, crystals, vintage clothing.",category:"Shopping"},
+  /* Updated vendor coordinates + SpectroDolce + Cami's + Millie's */
+  {position:[40.3312173,-79.7110630],name:"Cami’s Dreamland",description:"Whimsical décor, crystals, vintage clothing.",category:"Shopping"},
   {position:[40.3311511,-79.7107730],name:"FYZICAL Therapy & Balance Centers",description:"STOPAIN sales & therapy info.",category:"Shopping"},
   {position:[40.3311826,-79.7109007],name:"Hype and Harmony",description:"Jewelry & clothing.",category:"Shopping"},
   {position:[40.3310752,-79.7109168],name:"Window Nation",description:"Window & door information.",category:"Shopping"},
   {position:[40.3311115,-79.7110801],name:"Fox’s Pizza North Huntingdon",description:"Pizza, drinks, cookies, light-up toys.",category:"Food"},
   {position:[40.3311396,-79.7111860],name:"The Rustic Roamer Coffee",description:"Specialty coffee & baked goods.",category:"Food"},
   {position:[40.3310650,-79.7107941],name:"SpectroDolce",description:"Candy, hot chocolate, waffles, fudge, sodas.",category:"Food"},
+  {position:[40.3312383,-79.711840],name:"Millie’s Homemade Ice Cream",description:"Ice cream treats.",category:"Food"},
 
   {position:[40.3326215,-79.7103576],name:"Calvin Presbyterian Church",description:"Free kids’ crafts & glow bracelets.",category:"Shopping"},
   {position:[40.3327161,-79.7105041],name:"Live! Casino Pittsburgh",description:"Promo items & literature.",category:"Shopping"},
@@ -404,7 +405,7 @@ const searchInput=document.getElementById('searchInput'),searchResults=document.
 document.getElementById('searchClear').onclick=()=>{searchInput.value='';renderResults([]);searchInput.focus();};
 let allData=[];
 function rebuildSearchIndex(){
-  // Use ONLY markers (already includes vendors & restrooms) + schedule, then de-dupe
+  // Use ONLY markers (vendors & restrooms) + schedule, then de-dupe
   const loc=markers.map(m=>({type:m.category,title:m.name,description:m._desc,target:m.name}));
   const sched=[...document.querySelectorAll('#scheduleList .row')].map(e=>({type:'Event',title:e.innerText,description:e.innerText,target:e.dataset.target||''}));
   const seen=new Set();
