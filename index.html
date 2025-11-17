@@ -268,7 +268,6 @@ const icons={Restrooms:makeIcon("🚻",colors.Restrooms),Events:makeIcon("🎄",
 
 const basePins=[
   {position:[40.3314911,-79.7107],name:"Restrooms",description:"Public restrooms at 415 Main St.",category:"Restrooms"},
-  {position:[40.3314911,-79.7107],name:"Restrooms",description:"Public restrooms at Shidle Lodge.",category:"Restrooms"},
   {position:[40.3311033,-79.7107160], name:"Portable Restroom – 5th St Lot", description:"Portable Restroom", category:"Restrooms"},
   {position:[40.3326348,-79.7100816], name:"Portable Restroom – 3rd St Lot", description:"Portable Restroom", category:"Restrooms"},
   {position:[40.332795,-79.710338],name:"Tree Lighting",description:"S&T Bank Plaza.",category:"Events"},
@@ -332,10 +331,10 @@ overlay=document.getElementById('overlay'),searchTray=document.getElementById('s
 function hidePanels(){panels.forEach(v=>v.classList.remove('active'));navItems.forEach(n=>n.classList.remove('active'));
 overlay.classList.remove('active');searchTray.classList.remove('active');current=null;}
 function togglePanel(v){if(v==='search'){const o=searchTray.classList.contains('active');hidePanels();
-if(!o){rebuildSearchIndex();searchTray.classList.add('active');document.querySelector('.nav-item[data-view=\"search\"]').classList.add('active');
+if(!o){rebuildSearchIndex();searchTray.classList.add('active');document.querySelector('.nav-item[data-view="search"]').classList.add('active');
 overlay.classList.add('active');setTimeout(()=>document.getElementById('searchInput').focus(),50);current='search';}return;}
 if(current===v){hidePanels();return;}hidePanels();document.getElementById('view-'+v).classList.add('active');
-document.querySelector(`.nav-item[data-view=\"${v}\"]`).classList.add('active');overlay.classList.add('active');current=v;}
+document.querySelector(`.nav-item[data-view="${v}"]`).classList.add('active');overlay.classList.add('active');current=v;}
 overlay.onclick=hidePanels;map.on('click',hidePanels);
 navItems.forEach(i=>i.addEventListener('click',()=>togglePanel(i.dataset.view)));
 
@@ -405,10 +404,16 @@ const searchInput=document.getElementById('searchInput'),searchResults=document.
 document.getElementById('searchClear').onclick=()=>{searchInput.value='';renderResults([]);searchInput.focus();};
 let allData=[];
 function rebuildSearchIndex(){
+  // Use ONLY markers (already includes vendors & restrooms) + schedule, then de-dupe
   const loc=markers.map(m=>({type:m.category,title:m.name,description:m._desc,target:m.name}));
   const sched=[...document.querySelectorAll('#scheduleList .row')].map(e=>({type:'Event',title:e.innerText,description:e.innerText,target:e.dataset.target||''}));
-  const vend=vendorsData.map(v=>({type:v.cat,title:v.name,description:v.desc,target:v.name}));
-  allData=[...loc,...vend,...sched];
+  const seen=new Set();
+  allData=[...loc,...sched].filter(i=>{
+    const key=`${i.type}|${i.title}`;
+    if(seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 function highlight(t,q){if(!q)return t;return t.replace(new RegExp(`(${q})`,'gi'),'<mark>$1</mark>');}
 function renderResults(a,q=''){if(!a.length){searchResults.innerHTML='<div class=result>No results found.</div>';return;}
