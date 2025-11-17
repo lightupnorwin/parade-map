@@ -213,14 +213,8 @@ body{
           <button class="btn secondary" onclick="routeToByName('Restrooms')">Get Directions</button>
         </div>
       </div>
-      <div class="row"><div>Portable Units — S&amp;T Bank Plaza<span class="badge">Restroom</span></div>
-        <div class="btn-row">
-          <button class="btn" onclick="focusLocation('Tree Lighting')">Show on Map</button>
-          <button class="btn secondary" onclick="routeToByName('Tree Lighting')">Get Directions</button>
-        </div>
-      </div>
 
-      <!-- ✳️ Added two new specific portable restroom rows -->
+      <!-- Portable restroom rows kept -->
       <div class="row"><div>Portable Restroom – 5th St Lot<span class="badge">Restroom</span></div>
         <div class="btn-row">
           <button class="btn" onclick="focusLocation('Portable Restroom – 5th St Lot')">Show on Map</button>
@@ -233,7 +227,7 @@ body{
           <button class="btn secondary" onclick="routeToByName('Portable Restroom – 3rd St Lot')">Get Directions</button>
         </div>
       </div>
-      <!-- ✳️ End added rows -->
+      <!-- End portable rows -->
 
     </div>
   </div>
@@ -275,12 +269,8 @@ const icons={Restrooms:makeIcon("🚻",colors.Restrooms),Events:makeIcon("🎄",
 const basePins=[
   {position:[40.3314911,-79.7107],name:"Restrooms",description:"Public restrooms at 415 Main St.",category:"Restrooms"},
   {position:[40.3314911,-79.7107],name:"Restrooms",description:"Public restrooms at Shidle Lodge.",category:"Restrooms"},
-
-  /* ✳️ Updated portable restrooms with your names & coordinates */
   {position:[40.3311033,-79.7107160], name:"Portable Restroom – 5th St Lot", description:"Portable Restroom", category:"Restrooms"},
   {position:[40.3326348,-79.7100816], name:"Portable Restroom – 3rd St Lot", description:"Portable Restroom", category:"Restrooms"},
-  /* ✳️ End updates */
-
   {position:[40.332795,-79.710338],name:"Tree Lighting",description:"S&T Bank Plaza.",category:"Events"},
   {position:[40.332008,-79.711068],name:"Main Street Stage",description:"Live performances all evening.",category:"Events"}
 ];
@@ -296,19 +286,20 @@ const vendorPins = [
   {position:[40.3319376,-79.7107961],name:"Courtyard Specialities",description:"Funnel cakes, fried Oreos, corn dogs, pretzels.",category:"Food"},
   {position:[40.3325906,-79.7101336],name:"High on the Hog",description:"BBQ favorites.",category:"Food"},
   {position:[40.3325712,-79.7102157],name:"Mutiny Donuts",description:"Fresh donuts made on site.",category:"Food"},
+
+  /* Updated vendor coordinates + SpectroDolce */
+  {position:[40.3312148,-79.7110603],name:"Cami’s Dreamland",description:"Whimsical décor, crystals, vintage clothing.",category:"Shopping"},
+  {position:[40.3311511,-79.7107730],name:"FYZICAL Therapy & Balance Centers",description:"STOPAIN sales & therapy info.",category:"Shopping"},
+  {position:[40.3311826,-79.7109007],name:"Hype and Harmony",description:"Jewelry & clothing.",category:"Shopping"},
+  {position:[40.3310752,-79.7109168],name:"Window Nation",description:"Window & door information.",category:"Shopping"},
+  {position:[40.3311115,-79.7110801],name:"Fox’s Pizza North Huntingdon",description:"Pizza, drinks, cookies, light-up toys.",category:"Food"},
+  {position:[40.3311396,-79.7111860],name:"The Rustic Roamer Coffee",description:"Specialty coffee & baked goods.",category:"Food"},
+  {position:[40.3310650,-79.7107941],name:"SpectroDolce",description:"Candy, hot chocolate, waffles, fudge, sodas.",category:"Food"},
+
   {position:[40.3326215,-79.7103576],name:"Calvin Presbyterian Church",description:"Free kids’ crafts & glow bracelets.",category:"Shopping"},
   {position:[40.3327161,-79.7105041],name:"Live! Casino Pittsburgh",description:"Promo items & literature.",category:"Shopping"},
   {position:[40.3326836,-79.7101262],name:"Norwin Mini-Thon",description:"Hot cocoa, face painting & merch.",category:"Shopping"},
   {position:[40.3327340,-79.7103750],name:"Saunders Heating & AC, LLC",description:"HVAC info & giveaways.",category:"Shopping"},
-  {position:[40.3312196,-79.7111481],name:"Millie’s Homemade Ice Cream",description:"Ice cream treats.",category:"Food"},
-  {position:[40.3311514,-79.7110409],name:"Fox’s Pizza North Huntingdon",description:"Pizza, drinks, cookies, light-up toys.",category:"Food"},
-  {position:[40.3311430,-79.7108390],name:"Cami’s Dreamland",description:"Whimsical décor, crystals, vintage clothing.",category:"Shopping"},
-  {position:[40.3311212,-79.7107485],name:"FYZICAL Therapy & Balance Centers",description:"STOPAIN sales & therapy info.",category:"Shopping"},
-  {position:[40.3310267,-79.7108169],name:"Window Nation",description:"Window & door information.",category:"Shopping"},
-  {position:[40.3310632,-79.7110046],name:"Hype and Harmony",description:"Jewelry & clothing.",category:"Shopping"},
-  {position:[40.3311279,-79.7111954],name:"The Rustic Roamer Coffee",description:"Specialty coffee & baked goods.",category:"Food"},
-  {position:[40.3311460,-79.7114948],name:"Zack Poole",description:"Local artisan & crafts.",category:"Shopping"},
-  {position:[40.3310466,-79.7115139],name:"A & A Novelties",description:"Light-up toys & Christmas novelties.",category:"Shopping"},
   // --- Shidle Lodge Vendors near Restrooms ---
   {position:[40.331495,-79.71088],name:"Shidle Lodge Food",description:"Hot Dogs, Hot Sausage, Hot Chocolate.",category:"Food"},
   {position:[40.331505,-79.71080],name:"Shidle Lodge Crafts",description:"Selling handcrafted ornaments.",category:"Shopping"}
