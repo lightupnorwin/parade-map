@@ -221,7 +221,6 @@
         cursor: pointer;
         font-weight: 600;
         font-size: 16px;
-        min-height: 44px;
     }
 
     .btn:active {
@@ -369,29 +368,22 @@
         </div>
         <div class="scroll-inner">
             <div class="card" id="scheduleList">
-
-                <!-- 50/50 unchanged -->
                 <div class="row" data-time="ALWAYS" data-target="Shidle Lodge Food">
                     50/50 Ticket Raffle at Shidle Lodge (415 Main St)
                     <span class="badge">Event</span>
                 </div>
-
-                <!-- UPDATED SCHEDULE OPTION A -->
                 <div class="row" data-time="2025-11-20T17:00:00-05:00" data-target="Main Street Stage">
                     <strong>5:00 PM</strong> – East End Kids
                     <span class="badge">Event</span>
                 </div>
-
                 <div class="row" data-time="2025-11-20T17:45:00-05:00" data-target="Main Street Stage">
                     <strong>5:45 PM</strong> – C.P. Music Students
                     <span class="badge">Event</span>
                 </div>
-
                 <div class="row" data-time="2025-11-20T18:30:00-05:00" data-target="Tree Lighting">
                     <strong>6:30 PM</strong> – Parade Begins! <em>(Rick Sebak of WQED serves as MC)</em>
                     <span class="badge">Parade</span>
                 </div>
-
             </div>
         </div>
     </div>
@@ -424,6 +416,7 @@
                     </div>
                 </div>
 
+                <!-- Portable restroom rows kept -->
                 <div class="row">
                     <div>
                         Portable Restroom – 5th St Lot
@@ -434,7 +427,6 @@
                         <button class="btn secondary" onclick="routeToByName('Portable Restroom – 5th St Lot')">Get Directions</button>
                     </div>
                 </div>
-
                 <div class="row">
                     <div>
                         Portable Restroom – 3rd St Lot
@@ -445,6 +437,7 @@
                         <button class="btn secondary" onclick="routeToByName('Portable Restroom – 3rd St Lot')">Get Directions</button>
                     </div>
                 </div>
+                <!-- End portable rows -->
 
             </div>
         </div>
@@ -470,9 +463,9 @@
     </div>
 
     <!-- JS imports -->
+
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
-
     <script>
     const map = L.map('map', { zoomControl: true }).setView([40.332, -79.7105], 18);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 20 }).addTo(map);
@@ -511,14 +504,17 @@
 
       /* Updated vendor coordinates + SpectroDolce + Cami's + Millie's */
       { position: [40.3312173, -79.7110430], name: "Cami’s Dreamland", description: "Whimsical décor, crystals, vintage clothing.", category: "Shopping" },
-      { position: [40.3311511, -79.7107730], name: "FYZICAL Therapy & Balance Centers", description: "STOPAIN sales & therapy info.", category: "Shopping" },
+
+      /* FYZICAL moved LEFT (west) */
+      { position: [40.3311511, -79.71098], name: "FYZICAL Therapy & Balance Centers", description: "STOPAIN sales & therapy info.", category: "Shopping" },
+
       { position: [40.3311826, -79.7109007], name: "Hype and Harmony", description: "Jewelry & clothing.", category: "Shopping" },
       { position: [40.3310752, -79.7109168], name: "Window Nation", description: "Window & door information.", category: "Shopping" },
       { position: [40.3311115, -79.7110801], name: "Fox’s Pizza North Huntingdon", description: "Pizza, drinks, cookies, light-up toys.", category: "Food" },
       { position: [40.3311396, -79.7111860], name: "The Rustic Roamer Coffee", description: "Specialty coffee & baked goods.", category: "Food" },
       { position: [40.3310650, -79.7107941], name: "SpectroDolce", description: "Candy, hot chocolate, waffles, fudge, sodas.", category: "Food" },
 
-      /* Millie's */
+      /* ✅ Millie’s set just LEFT (west) of Cami’s */
       { position: [40.331225, -79.71112], name: "Millie’s Homemade Ice Cream", description: "Ice cream treats.", category: "Food" },
 
       { position: [40.3326215, -79.7103576], name: "Calvin Presbyterian Church", description: "Free kids’ crafts & glow bracelets.", category: "Shopping" },
@@ -526,15 +522,16 @@
       { position: [40.3326836, -79.7101262], name: "Norwin Mini-Thon", description: "Hot cocoa, face painting & merch.", category: "Shopping" },
       { position: [40.3327340, -79.7103750], name: "Saunders Heating & AC, LLC", description: "HVAC info & giveaways.", category: "Shopping" },
 
+      /* Added back in original spots */
       { position: [40.3311460, -79.7114948], name: "Zack Poole", description: "Local artisan & crafts.", category: "Shopping" },
       { position: [40.3310466, -79.7115139], name: "A & A Novelties", description: "Light-up toys & Christmas novelties.", category: "Shopping" },
 
-      /* --- Shidle Lodge Vendors near Restrooms --- */
+      // --- Shidle Lodge Vendors near Restrooms ---
       { position: [40.331495, -79.71088], name: "Shidle Lodge Food", description: "Hot Dogs & Hot Sausage.", category: "Food" },
       { position: [40.331505, -79.71080], name: "Shidle Lodge Events", description: "50/50 raffle, free hot chocolate, water & Coffee. Balloon animals.", category: "Shopping" },
 
-      /* NEW: Jamie's Dream Team */
-      { position: [40.331309, -79.7107482], name: "Jamie's Dream Team", description: "Coffee, Hot Chocolate, Water, Hot Dogs.", category: "Food" }
+      /* Jamie's moved to the RIGHT (east) of FYZICAL but still west of the 5th St portable restroom */
+      { position: [40.3311511, -79.71090], name: "Jamie's Dream Team", description: "Coffee, Hot Chocolate, Water, Hot Dogs.", category: "Food" }
     ];
 
     const markers = [];
