@@ -221,6 +221,7 @@
         cursor: pointer;
         font-weight: 600;
         font-size: 16px;
+        min-height: 44px;
     }
 
     .btn:active {
@@ -284,7 +285,7 @@
     }
 
     .search-tray {
-        position: fixed;
+        position: fixed,
         top: 72px;
         left: 0;
         width: 100%;
@@ -505,17 +506,22 @@
       /* Updated vendor coordinates + SpectroDolce + Cami's + Millie's */
       { position: [40.3312173, -79.7110430], name: "Cami’s Dreamland", description: "Whimsical décor, crystals, vintage clothing.", category: "Shopping" },
 
-      /* FYZICAL moved LEFT (west) */
-      { position: [40.3311511, -79.71098], name: "FYZICAL Therapy & Balance Centers", description: "STOPAIN sales & therapy info.", category: "Shopping" },
+      /* Hype moved to the RIGHT of Cami's */
+      { position: [40.331212, -79.71097], name: "Hype and Harmony", description: "Jewelry & clothing.", category: "Shopping" },
 
-      { position: [40.3311826, -79.7109007], name: "Hype and Harmony", description: "Jewelry & clothing.", category: "Shopping" },
+      /* FYZICAL moved to Hype's former spot */
+      { position: [40.3311826, -79.7109007], name: "FYZICAL Therapy & Balance Centers", description: "STOPAIN sales & therapy info.", category: "Shopping" },
+
       { position: [40.3310752, -79.7109168], name: "Window Nation", description: "Window & door information.", category: "Shopping" },
       { position: [40.3311115, -79.7110801], name: "Fox’s Pizza North Huntingdon", description: "Pizza, drinks, cookies, light-up toys.", category: "Food" },
       { position: [40.3311396, -79.7111860], name: "The Rustic Roamer Coffee", description: "Specialty coffee & baked goods.", category: "Food" },
       { position: [40.3310650, -79.7107941], name: "SpectroDolce", description: "Candy, hot chocolate, waffles, fudge, sodas.", category: "Food" },
 
-      /* ✅ Millie’s set just LEFT (west) of Cami’s */
+      /* Millie's */
       { position: [40.331225, -79.71112], name: "Millie’s Homemade Ice Cream", description: "Ice cream treats.", category: "Food" },
+
+      /* Jamie's RIGHT (east) of FYZICAL, aligned to the row */
+      { position: [40.331200, -79.71084], name: "Jamie's Dream Team", description: "Coffee, Hot Chocolate, Water, Hot Dogs.", category: "Food" },
 
       { position: [40.3326215, -79.7103576], name: "Calvin Presbyterian Church", description: "Free kids’ crafts & glow bracelets.", category: "Shopping" },
       { position: [40.3327161, -79.7105041], name: "Live! Casino Pittsburgh", description: "Promo items & literature.", category: "Shopping" },
@@ -528,10 +534,7 @@
 
       // --- Shidle Lodge Vendors near Restrooms ---
       { position: [40.331495, -79.71088], name: "Shidle Lodge Food", description: "Hot Dogs & Hot Sausage.", category: "Food" },
-      { position: [40.331505, -79.71080], name: "Shidle Lodge Events", description: "50/50 raffle, free hot chocolate, water & Coffee. Balloon animals.", category: "Shopping" },
-
-      /* Jamie's moved to the RIGHT (east) of FYZICAL but still west of the 5th St portable restroom */
-      { position: [40.3311511, -79.71090], name: "Jamie's Dream Team", description: "Coffee, Hot Chocolate, Water, Hot Dogs.", category: "Food" }
+      { position: [40.331505, -79.71080], name: "Shidle Lodge Events", description: "50/50 raffle, free hot chocolate, water & Coffee. Balloon animals.", category: "Shopping" }
     ];
 
     const markers = [];
