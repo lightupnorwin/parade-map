@@ -1,3 +1,6 @@
+Here you go—added exactly what you asked: a permanent 4:30 PM schedule row and a 🎵 music-note pin at the precise coords. Nothing else touched.
+
+```html
 <!DOCTYPE html> 
 <html lang="en">
 <head>
@@ -373,6 +376,13 @@
                     50/50 Ticket Raffle at Shidle Lodge (415 Main St)
                     <span class="badge">Event</span>
                 </div>
+
+                <!-- NEW: Always-visible 4:30 PM music event -->
+                <div class="row" data-time="ALWAYS" data-target="Club Pure Imagination — Michael Carluccio (4:30 PM)">
+                    <strong>4:30 PM</strong> – Michael Carluccio singing Holiday Favorites at Club Pure Imagination
+                    <span class="badge">Event</span>
+                </div>
+
                 <div class="row" data-time="2025-11-20T17:00:00-05:00" data-target="Main Street Stage">
                     <strong>5:00 PM</strong> – East End Kids
                     <span class="badge">Event</span>
@@ -471,7 +481,7 @@
     const map = L.map('map', { zoomControl: true }).setView([40.332, -79.7105], 18);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 20 }).addTo(map);
 
-    const colors = { Restrooms: "#007aff", Events: "#ff3b30", Food: "#34c759", Shopping: "#af52de", Accessible: "#0a84ff" };
+    const colors = { Restrooms: "#007aff", Events: "#ff3b30", Food: "#34c759", Shopping: "#af52de", Accessible: "#0a84ff", Music: "#ff9500" };
     function makeIcon(e, c) {
         const s = encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'><circle cx='20' cy='20' r='18' fill='${c}'/><text x='50%' y='55%' font-size='18' text-anchor='middle' fill='white'>${e}</text></svg>`);
         return L.icon({ iconUrl: "data:image/svg+xml," + s, iconSize: [30, 30], iconAnchor: [15, 30], popupAnchor: [0, -28] });
@@ -481,7 +491,8 @@
         Events: makeIcon("🎄", colors.Events),
         Food: makeIcon("🍔", colors.Food),
         Shopping: makeIcon("🛍️", colors.Shopping),
-        Accessible: makeIcon("♿", colors.Accessible)
+        Accessible: makeIcon("♿", colors.Accessible),
+        Music: makeIcon("🎵", colors.Music)
     };
 
     const basePins = [
@@ -492,7 +503,10 @@
       { position: [40.332008, -79.711068], name: "Main Street Stage", description: "Live performances all evening.", category: "Events" },
 
       /* ♿ Handicap Parking */
-      { position: [40.3330072, -79.7097393], name: "Accessible Parking", description: "Handicap parking.", category: "Accessible" }
+      { position: [40.3330072, -79.7097393], name: "Accessible Parking", description: "Handicap parking.", category: "Accessible" },
+
+      /* NEW: 🎵 Music pin for Club Pure Imagination */
+      { position: [40.3313998, -79.7109601], name: "Club Pure Imagination — Michael Carluccio (4:30 PM)", description: "Michael Carluccio singing Holiday Favorites at 4:30 PM.", category: "Music" }
     ];
 
     const vendorPins = [
@@ -665,3 +679,4 @@
 
 </body>
 </html>
+```
