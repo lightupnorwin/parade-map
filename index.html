@@ -8,65 +8,346 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css">
     <style>
-    html, body { height: 100%; margin: 0; overflow: hidden; }
-    #map { height: 100%; width: 100%; position: absolute; top: 0; left: 0; z-index: 1; }
+    html, body {
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+    }
 
-    :root { --brand:#1756ff; --bg:#fff; --ink:#111; --muted:#555; --panel-bg:linear-gradient(180deg,#fff 0%,#f8f9fb 100%); }
+    #map {
+        height: 100%;
+        width: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1;
+    }
 
-    body { background:var(--bg); color:var(--ink); font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif; font-size:17px; line-height:1.5; }
+    :root {
+        --brand: #1756ff;
+        --bg: #fff;
+        --ink: #111;
+        --muted: #555;
+        --panel-bg: linear-gradient(180deg, #fff 0%, #f8f9fb 100%);
+    }
 
-    /* --- Top Nav --- */
-    .top-nav{position:fixed;top:0;left:0;width:100%;height:72px;background:var(--panel-bg);display:flex;justify-content:space-around;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.15);border-bottom:1px solid #ddd;z-index:15;padding-top:env(safe-area-inset-top,0)}
-    .nav-item{flex:1;text-align:center;cursor:pointer;font-weight:600;color:#333;transition:color .2s,font-size .2s;font-size:16px;min-height:44px}
-    .nav-item span{display:block;font-size:26px;margin-bottom:2px}
-    .nav-item.active{color:var(--brand);text-shadow:0 0 6px rgba(23,86,255,.35)}
+    body {
+        background: var(--bg);
+        color: var(--ink);
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+        font-size: 17px;
+        line-height: 1.5;
+    }/* --- Top Nav --- */
+    .top-nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 72px;
+        background: var(--panel-bg);
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        border-bottom: 1px solid #ddd;
+        z-index: 15;
+        padding-top: env(safe-area-inset-top, 0);
+    }
 
-    /* --- Map buttons --- */
-    .map-actions{position:absolute;top:92px;right:20px;display:flex;flex-direction:column;gap:10px;z-index:12}
-    .map-actions button{background:#fff;border:none;border-radius:50%;width:52px;height:52px;font-size:26px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.3);transition:transform .15s ease}
-    .map-actions button:active{transform:scale(.95)}
-    .route-actions{position:absolute;top:92px;left:20px;z-index:12;display:none}
-    .route-actions .cancel{background:#fff;border:none;border-radius:999px;padding:12px 18px;font-weight:700;font-size:17px;box-shadow:0 2px 8px rgba(0,0,0,.3);cursor:pointer}
-    .route-actions.show{display:block}
+    .nav-item {
+        flex: 1;
+        text-align: center;
+        cursor: pointer;
+        font-weight: 600;
+        color: #333;
+        transition: color .2s, font-size .2s;
+        font-size: 16px;
+        min-height: 44px;
+    }
 
-    /* --- Panels --- */
-    .view{position:fixed;left:50%;bottom:0;transform:translate(-50%,100%);width:92%;max-width:640px;background:var(--panel-bg);border-top-left-radius:16px;border-top-right-radius:16px;box-shadow:0 -3px 15px rgba(0,0,0,.25);display:flex;flex-direction:column;max-height:70vh;overflow:hidden;transition:transform .35s cubic-bezier(.25,.8,.25,1);z-index:10;backdrop-filter:blur(8px);pointer-events:none;visibility:hidden}
-    .view.active{transform:translate(-50%,0);pointer-events:auto;visibility:visible;z-index:20}
+    .nav-item span {
+        display: block;
+        font-size: 26px;
+        margin-bottom: 2px;
+    }
 
-    /* --- Panel header --- */
-    .view-header{position:sticky;top:0;background:var(--panel-bg);display:flex;align-items:center;justify-content:space-between;padding:18px 22px 12px;border-bottom:1px solid rgba(0,0,0,.1);z-index:25}
-    .view-header h1{margin:0;font-size:22px;font-weight:700;display:flex;align-items:center;gap:8px}
-    .close-btn{border:none;background:rgba(255,255,255,.95);color:#000;font-size:22px;font-weight:bold;border-radius:50%;width:40px;height:40px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.3);flex-shrink:0}
-    .close-btn:active{transform:scale(.95)}
-    .scroll-inner{flex:1;overflow-y:auto;padding:14px 22px 100px}
+    .nav-item.active {
+        color: var(--brand);
+        text-shadow: 0 0 6px rgba(23, 86, 255, 0.35);
+    }/* --- Map buttons --- */
+    .map-actions {
+        position: absolute;
+        top: 92px;
+        right: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        z-index: 12;
+    }
 
-    /* --- Content --- */
-    .card{background:transparent;}
-    .row{padding:14px 0;border-top:1px solid rgba(0,0,0,.1)}
-    .row:first-child{border-top:none}
-    .row strong{font-size:17px}
-    .btn{background:var(--brand);color:#fff;padding:10px 14px;border:none;border-radius:10px;cursor:pointer;font-weight:600;font-size:16px;min-height:44px}
-    .btn:active{transform:scale(.97)}
-    .btn.secondary{background:#e9ecf7;color:#122}
-    .btn:hover{opacity:.9}
-    .badge{display:inline-block;background:#eef3ff;color:#245;font-weight:700;border-radius:999px;padding:3px 9px;margin-left:6px;font-size:13px}
-    .btn-row{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end;margin-top:8px}
-    @media (max-width:480px){.btn-row{flex-direction:column;align-items:stretch}.btn-row .btn{width:100%}}
+    .map-actions button {
+        background: #fff;
+        border: none;
+        border-radius: 50%;
+        width: 52px;
+        height: 52px;
+        font-size: 26px;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        transition: transform .15s ease;
+    }
 
-    /* --- Overlay & search --- */
-    .overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.25);opacity:0;visibility:hidden;transition:opacity .25s;z-index:5}
-    .overlay.active{opacity:1;visibility:visible}
-    .search-tray{position:fixed;top:72px;left:0;width:100%;background:#fff;border-bottom:1px solid #ddd;z-index:14;transform:translateY(-110%);transition:transform .25s ease;box-shadow:0 2px 10px rgba(0,0,0,.1)}
-    .search-tray.active{transform:translateY(0)}
-    .search-inner{padding:12px 14px 16px}
-    .search-bar{display:flex;gap:10px}
-    .search-input{flex:1;border:1px solid #ddd;border-radius:12px;padding:12px 14px;font-size:17px;outline:none}
-    .search-results{max-height:50vh;overflow:auto;margin-top:10px}
-    .result{padding:12px;border-top:1px solid #eee}
-    .result-title{font-weight:700;font-size:17px}
-    .result-meta{color:#666;font-size:15px;margin:3px 0 6px}
-    .leaflet-marker-icon{filter:drop-shadow(0 2px 4px rgba(0,0,0,.25))}
-    .leaflet-routing-container{display:none}
+    .map-actions button:active {
+        transform: scale(0.95);
+    }
+
+    .route-actions {
+        position: absolute;
+        top: 92px;
+        left: 20px;
+        z-index: 12;
+        display: none;
+    }
+
+    .route-actions .cancel {
+        background: #fff;
+        border: none;
+        border-radius: 999px;
+        padding: 12px 18px;
+        font-weight: 700;
+        font-size: 17px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, .3);
+        cursor: pointer;
+    }
+
+    .route-actions.show {
+        display: block;
+    }/* --- Panels --- */
+    .view {
+        position: fixed;
+        left: 50%;
+        bottom: 0;
+        transform: translate(-50%, 100%);
+        width: 92%;
+        max-width: 640px;
+        background: var(--panel-bg);
+        border-top-left-radius: 16px;
+        border-top-right-radius: 16px;
+        box-shadow: 0 -3px 15px rgba(0, 0, 0, 0.25);
+        display: flex;
+        flex-direction: column;
+        max-height: 70vh;
+        overflow: hidden;
+        transition: transform 0.35s cubic-bezier(.25, .8, .25, 1);
+        z-index: 10;
+        backdrop-filter: blur(8px);
+        pointer-events: none;
+        visibility: hidden;
+    }
+
+    .view.active {
+        transform: translate(-50%, 0);
+        pointer-events: auto;
+        visibility: visible;
+        z-index: 20;
+    }/* --- Panel header --- */
+    .view-header {
+        position: sticky;
+        top: 0;
+        background: var(--panel-bg);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 22px 12px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        z-index: 25;
+    }
+
+    .view-header h1 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .close-btn {
+        border: none;
+        background: rgba(255, 255, 255, 0.95);
+        color: #000;
+        font-size: 22px;
+        font-weight: bold;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        flex-shrink: 0;
+    }
+
+    .close-btn:active {
+        transform: scale(0.95);
+    }
+
+    .scroll-inner {
+        flex: 1;
+        overflow-y: auto;
+        padding: 14px 22px 100px;
+    }/* --- Content --- */
+    .card {
+        background: transparent.
+    }
+
+    .row {
+        padding: 14px 0;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .row:first-child {
+        border-top: none;
+    }
+
+    .row strong {
+        font-size: 17px;
+    }
+
+    .btn {
+        background: var(--brand);
+        color: #fff;
+        padding: 10px 14px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 16px;
+        min-height: 44px;
+    }
+
+    .btn:active {
+        transform: scale(0.97);
+    }
+
+    .btn.secondary {
+        background: #e9ecf7;
+        color: #122;
+    }
+
+    .btn:hover {
+        opacity: .9;
+    }
+
+    .badge {
+        display: inline-block;
+        background: #eef3ff;
+        color: #245;
+        font-weight: 700;
+        border-radius: 999px;
+        padding: 3px 9px;
+        margin-left: 6px;
+        font-size: 13px;
+    }
+
+    .btn-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: flex-end;
+        margin-top: 8px;
+    }
+
+    @media (max-width: 480px) {
+        .btn-row {
+            flex-direction: column;
+            align-items: stretch
+        }
+
+        .btn-row .btn {
+            width: 100%
+        }
+    }/* --- Overlay & search --- */
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.25);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity .25s;
+        z-index: 5;
+    }
+
+    .overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .search-tray {
+        position: fixed;
+        top: 72px;
+        left: 0;
+        width: 100%;
+        background: #fff;
+        border-bottom: 1px solid #ddd;
+        z-index: 14;
+        transform: translateY(-110%);
+        transition: transform .25s ease;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .search-tray.active {
+        transform: translateY(0);
+    }
+
+    .search-inner {
+        padding: 12px 14px 16px;
+    }
+
+    .search-bar {
+        display: flex;
+        gap: 10px;
+    }
+
+    .search-input {
+        flex: 1;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        padding: 12px 14px;
+        font-size: 17px;
+        outline: none;
+    }
+
+    .search-results {
+        max-height: 50vh;
+        overflow: auto;
+        margin-top: 10px;
+    }
+
+    .result {
+        padding: 12px;
+        border-top: 1px solid #eee;
+    }
+
+    .result-title {
+        font-weight: 700;
+        font-size: 17px;
+    }
+
+    .result-meta {
+        color: #666;
+        font-size: 15px;
+        margin: 3px 0 6px;
+    }
+
+    .leaflet-marker-icon {
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
+    }
+
+    .leaflet-routing-container {
+        display: none;
+    }
     </style>
 </head>
 
@@ -140,6 +421,7 @@
                     </div>
                 </div>
 
+                <!-- Portable restroom rows kept -->
                 <div class="row">
                     <div>
                         Portable Restroom – 5th St Lot
@@ -160,6 +442,7 @@
                         <button class="btn secondary" onclick="routeToByName('Portable Restroom – 3rd St Lot')">Get Directions</button>
                     </div>
                 </div>
+                <!-- End portable rows -->
 
             </div>
         </div>
@@ -185,6 +468,7 @@
     </div>
 
     <!-- JS imports -->
+
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
     <script>
@@ -211,7 +495,11 @@
       { position: [40.3326348, -79.7100816], name: "Portable Restroom – 3rd St Lot", description: "Portable Restroom", category: "Restrooms" },
       { position: [40.332795, -79.710338], name: "Tree Lighting", description: "S&T Bank Plaza.", category: "Events" },
       { position: [40.332008, -79.711068], name: "Main Street Stage", description: "Live performances all evening.", category: "Events" },
+
+      /* ♿ Handicap Parking */
       { position: [40.3330072, -79.7097393], name: "Accessible Parking", description: "Handicap parking.", category: "Accessible" },
+
+      /* 🎵 Music pin */
       { position: [40.3313998, -79.7109601], name: "Club Pure Imagination — Michael Carluccio (4:30 PM)", description: "Michael Carluccio singing Holiday Favorites at 4:30 PM.", category: "Music" }
     ];
 
@@ -226,21 +514,33 @@
       { position: [40.3319376, -79.7107961], name: "Courtyard Specialities", description: "Funnel cakes, fried Oreos, corn dogs, pretzels.", category: "Food" },
       { position: [40.3325906, -79.7101336], name: "High on the Hog", description: "BBQ favorites.", category: "Food" },
       { position: [40.3325712, -79.7102157], name: "Mutiny Donuts", description: "Fresh donuts made on site.", category: "Food" },
+
+      /* Updated vendor coordinates + SpectroDolce + Cami's + Millie's */
       { position: [40.3312173, -79.7110430], name: "Cami’s Dreamland", description: "Whimsical décor, crystals, vintage clothing.", category: "Shopping" },
       { position: [40.3311511, -79.71098], name: "FYZICAL Therapy & Balance Centers", description: "STOPAIN sales & therapy info.", category: "Shopping" },
       { position: [40.331212, -79.71097], name: "Hype and Harmony", description: "Jewelry & clothing.", category: "Shopping" },
+
       { position: [40.3310752, -79.7109168], name: "Window Nation", description: "Window & door information.", category: "Shopping" },
       { position: [40.3311115, -79.7110801], name: "Fox’s Pizza North Huntingdon", description: "Pizza, drinks, cookies, light-up toys.", category: "Food" },
       { position: [40.3311396, -79.7111860], name: "The Rustic Roamer Coffee", description: "Specialty coffee & baked goods.", category: "Food" },
       { position: [40.3310650, -79.7107941], name: "SpectroDolce", description: "Candy, hot chocolate, waffles, fudge, sodas.", category: "Food" },
+
+      /* ✅ Millie’s set just LEFT (west) of Cami’s */
       { position: [40.331225, -79.71112], name: "Millie’s Homemade Ice Cream", description: "Ice cream treats.", category: "Food" },
+
+      /* Jamie's RIGHT (east) of FYZICAL, aligned to the row */
       { position: [40.3311021, -79.7107726], name: "Jamie's Dream Team", description: "Coffee, Hot Chocolate, Water, Hot Dogs.", category: "Food" },
+
       { position: [40.3326215, -79.7103576], name: "Calvin Presbyterian Church", description: "Free kids’ crafts & glow bracelets.", category: "Shopping" },
       { position: [40.3327161, -79.7105041], name: "Live! Casino Pittsburgh", description: "Promo items & literature.", category: "Shopping" },
       { position: [40.3326836, -79.7101262], name: "Norwin Mini-Thon", description: "Hot cocoa, face painting & merch.", category: "Shopping" },
       { position: [40.3327340, -79.7103750], name: "Saunders Heating & AC, LLC", description: "HVAC info & giveaways.", category: "Shopping" },
+
+      /* Added back in original spots */
       { position: [40.3311460, -79.7114948], name: "Zack Poole", description: "Local artisan & crafts.", category: "Shopping" },
       { position: [40.3310466, -79.7115139], name: "A & A Novelties", description: "Light-up toys & Christmas novelties.", category: "Shopping" },
+
+      // --- Shidle Lodge Vendors near Restrooms ---
       { position: [40.331495, -79.71088], name: "Shidle Lodge Food", description: "Hot Dogs & Hot Sausage.", category: "Food" },
       { position: [40.331505, -79.71080], name: "Shidle Lodge Events", description: "50/50 raffle, free hot chocolate, water & Coffee. Balloon animals.", category: "Shopping" }
     ];
@@ -257,8 +557,22 @@
     });
     map.fitBounds(L.featureGroup(markers).getBounds(), { padding: [40, 40] });
 
-    // Focus
-    function focusLocation(n){ const m = markers.find(x => x.name === n); if(m){ hidePanels(); map.setView(m.getLatLng(), 19); m.openPopup(); } }
+    // Focus (robust to quotes/spacing)
+    function normalizeName(s){
+      return String(s).toLowerCase().replace(/[’]/g,"'").replace(/\s+/g,' ').trim();
+    }
+    function getMarkerByName(n){
+      let m = markers.find(x => x.name === n);
+      if(!m){
+        const nn = normalizeName(n);
+        m = markers.find(x => normalizeName(x.name) === nn);
+      }
+      return m;
+    }
+    function focusLocation(n){
+      const m = getMarkerByName(n);
+      if(m){ hidePanels(); map.setView(m.getLatLng(), 19); m.openPopup(); }
+    }
 
     // Locate Me
     document.getElementById("locateMe").onclick = () => navigator.geolocation?.getCurrentPosition(p=>{
@@ -341,7 +655,10 @@
 
     /* Routing */
     let routeControl=null, userMarker=null, watchId=null, destLatLng=null;
-    function routeToByName(n){ const m=markers.find(x=>x.name===n); if(m) startRoutingTo(m.getLatLng()); }
+    function routeToByName(n){
+      const m = getMarkerByName(n);
+      if(m) startRoutingTo(m.getLatLng());
+    }
     function startRoutingTo(l){
       destLatLng=L.latLng(l);
       if(!navigator.geolocation){ alert('Geolocation not supported'); return; }
