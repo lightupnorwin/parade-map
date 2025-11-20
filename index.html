@@ -37,7 +37,9 @@
         font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
         font-size: 17px;
         line-height: 1.5;
-    }/* --- Top Nav --- */
+    }
+
+    /* --- Top Nav --- */
     .top-nav {
         position: fixed;
         top: 0;
@@ -74,7 +76,9 @@
     .nav-item.active {
         color: var(--brand);
         text-shadow: 0 0 6px rgba(23, 86, 255, 0.35);
-    }/* --- Map buttons --- */
+    }
+
+    /* --- Map buttons --- */
     .map-actions {
         position: absolute;
         top: 92px;
@@ -122,7 +126,9 @@
 
     .route-actions.show {
         display: block;
-    }/* --- Panels --- */
+    }
+
+    /* --- Panels --- */
     .view {
         position: fixed;
         left: 50%;
@@ -150,7 +156,9 @@
         pointer-events: auto;
         visibility: visible;
         z-index: 20;
-    }/* --- Panel header --- */
+    }
+
+    /* --- Panel header --- */
     .view-header {
         position: sticky;
         top: 0;
@@ -194,7 +202,9 @@
         flex: 1;
         overflow-y: auto;
         padding: 14px 22px 100px;
-    }/* --- Content --- */
+    }
+
+    /* --- Content --- */
     .card {
         background: transparent;
     }
@@ -265,7 +275,9 @@
         .btn-row .btn {
             width: 100%
         }
-    }/* --- Overlay & search --- */
+    }
+
+    /* --- Overlay & search --- */
     .overlay {
         position: fixed;
         top: 0;
@@ -378,12 +390,6 @@
                     <span class="badge">Event</span>
                 </div>
 
-                <!-- NEW exact-hide Tree Lighting at 6:20 PM -->
-                <div class="row" data-time="2025-11-20T18:20:00-05:00" data-target="Tree Lighting" data-exact="true">
-                    <strong>6:20 PM</strong> – Tree Lighting
-                    <span class="badge">Event</span>
-                </div>
-
                 <div class="row" data-time="2025-11-20T17:00:00-05:00" data-target="Main Street Stage">
                     <strong>5:00 PM</strong> – East End Kids
                     <span class="badge">Event</span>
@@ -392,6 +398,13 @@
                     <strong>5:45 PM</strong> – C.P. Music Students
                     <span class="badge">Event</span>
                 </div>
+
+                <!-- exact-hide 6:20 before 6:30 -->
+                <div class="row" data-time="2025-11-20T18:20:00-05:00" data-target="Tree Lighting" data-exact="true">
+                    <strong>6:20 PM</strong> – Tree Lighting
+                    <span class="badge">Event</span>
+                </div>
+
                 <div class="row" data-time="2025-11-20T18:30:00-05:00" data-target="Tree Lighting">
                     <strong>6:30 PM</strong> – Parade Begins! <em>(Rick Sebak of WQED serves as MC)</em>
                     <span class="badge">Parade</span>
@@ -428,7 +441,7 @@
                     </div>
                 </div>
 
-                <!-- Portable restroom rows kept -->
+                <!-- Portable restroom rows -->
                 <div class="row">
                     <div>
                         Portable Restroom – 5th St Lot
@@ -450,7 +463,6 @@
                     </div>
                 </div>
                 <!-- End portable rows -->
-
             </div>
         </div>
     </div>
@@ -475,7 +487,6 @@
     </div>
 
     <!-- JS imports -->
-
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
     <script>
@@ -581,24 +592,16 @@
       if(m){ hidePanels(); map.setView(m.getLatLng(), 19); m.openPopup(); }
     }
 
-    // Locate Me
-    document.getElementById("locateMe").onclick = () => navigator.geolocation?.getCurrentPosition(p=>{
-      map.setView([p.coords.latitude, p.coords.longitude], 18);
-      L.circleMarker([p.coords.latitude, p.coords.longitude], { radius:8, color:"#1756ff", fillOpacity:.9 })
-        .addTo(map).bindPopup("You are here").openPopup();
-    });
-
-    // --- GPS warm-up to reduce initial routing lag ---
-    let geoPrimed = false;
-    function primeGeo(){
-      if(geoPrimed) return;
-      geoPrimed = true;
-      try{
-        navigator.geolocation?.getCurrentPosition(()=>{}, ()=>{}, { maximumAge:600000, timeout:3000 });
-      }catch(e){}
-    }
-    document.addEventListener('click', primeGeo, { once:true });
-    document.addEventListener('touchstart', primeGeo, { once:true });
+    // Locate Me — prompts only when pressed
+    document.getElementById("locateMe").onclick = () => {
+      if (!navigator.geolocation) { alert('Geolocation not supported'); return; }
+      navigator.geolocation.getCurrentPosition(p=>{
+        const here=[p.coords.latitude,p.coords.longitude];
+        map.setView(here, 18);
+        L.circleMarker(here, { radius:8, color:"#1756ff", fillOpacity:.9 })
+          .addTo(map).bindPopup("You are here").openPopup();
+      }, ()=>alert('Location permission denied.'));
+    };
 
     // Panel nav & overlay logic
     const navItems=document.querySelectorAll('.nav-item'), panels=document.querySelectorAll('.view'),
@@ -682,7 +685,7 @@
       return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
-    /* Routing */
+    /* Routing — prompts for location only when user requests directions */
     let routeControl=null, userMarker=null, watchId=null, destLatLng=null;
     function routeToByName(n){
       const m = getMarkerByName(n);
