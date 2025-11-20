@@ -377,6 +377,13 @@
                     <strong>4:30 PM</strong> – Michael Carluccio singing Holiday Favorites at Club Pure Imagination
                     <span class="badge">Event</span>
                 </div>
+
+                <!-- NEW exact-hide Tree Lighting at 6:20 PM -->
+                <div class="row" data-time="2025-11-20T18:20:00-05:00" data-target="Tree Lighting" data-exact="true">
+                    <strong>6:20 PM</strong> – Tree Lighting
+                    <span class="badge">Event</span>
+                </div>
+
                 <div class="row" data-time="2025-11-20T17:00:00-05:00" data-target="Main Street Stage">
                     <strong>5:00 PM</strong> – East End Kids
                     <span class="badge">Event</span>
@@ -500,7 +507,7 @@
       { position: [40.3330072, -79.7097393], name: "Accessible Parking", description: "Handicap parking.", category: "Accessible" },
 
       /* 🎵 Music pin */
-      { position: [40.3313998, -79.7109601], name: "Club Pure Imagination — Michael Carluccio", description: "Michael Carluccio singing Holiday Favorites at 4:30 PM.", category: "Music" }
+      { position: [40.3313998, -79.7109601], name: "Club Pure Imagination — Michael Carluccio", description: "Michael Carluccio singing Holiday Favorites starting at 4:30 PM.", category: "Music" }
     ];
 
     const vendorPins = [
@@ -581,6 +588,18 @@
         .addTo(map).bindPopup("You are here").openPopup();
     });
 
+    // --- GPS warm-up to reduce initial routing lag ---
+    let geoPrimed = false;
+    function primeGeo(){
+      if(geoPrimed) return;
+      geoPrimed = true;
+      try{
+        navigator.geolocation?.getCurrentPosition(()=>{}, ()=>{}, { maximumAge:600000, timeout:3000 });
+      }catch(e){}
+    }
+    document.addEventListener('click', primeGeo, { once:true });
+    document.addEventListener('touchstart', primeGeo, { once:true });
+
     // Panel nav & overlay logic
     const navItems=document.querySelectorAll('.nav-item'), panels=document.querySelectorAll('.view'),
           overlay=document.getElementById('overlay'), searchTray=document.getElementById('searchTray');
@@ -598,13 +617,23 @@
     overlay.onclick=hidePanels; map.on('click',hidePanels);
     navItems.forEach(i=>i.addEventListener('click',()=>togglePanel(i.dataset.view)));
 
-    // Schedule highlighting
+    // Schedule highlighting (with exact-hide support)
     function updateSchedule() {
       const n=new Date(); const r=document.querySelectorAll('#scheduleList .row'); let a=null,s=1/0;
       r.forEach(e=>{
         const timeAttr=e.dataset.time;
         if(timeAttr==="ALWAYS"){ e.style.display="block"; e.classList.remove('faded','active-now'); return; }
         const t=new Date(timeAttr); const d=(t-n)/6e4;
+
+        // EXACT-HIDE: disappear exactly at event time
+        if(e.dataset.exact === "true"){
+          if(n >= t){ e.style.display="none"; return; }
+          e.classList.remove('faded'); e.style.display="block";
+          if(d<s){ s=d; a=e; }
+          return;
+        }
+
+        // Default: keep for 15 minutes after start
         if(n < new Date("2025-11-20T00:00:00-05:00")){ e.style.display="block"; e.classList.remove('faded','active-now'); return; }
         if(d<-15){ e.style.display="none"; }
         else if(d<0){ e.classList.add('faded'); }
@@ -665,7 +694,7 @@
       if(!routeControl){
         routeControl=L.Routing.control({
           waypoints:[], addWaypoints:false, draggableWaypoints:false, fitSelectedRoutes:true, show:false,
-          router=L.Routing.osrmv1({serviceUrl:'https://router.project-osrm.org/route/v1', profile:'foot'}),
+          router:L.Routing.osrmv1({serviceUrl:'https://router.project-osrm.org/route/v1', profile:'foot'}),
           lineOptions:{styles:[{color:'#2E6CF6',weight:6,opacity:.9}]}
         }).addTo(map);
       }
@@ -677,7 +706,7 @@
         routeControl.setWaypoints([h,destLatLng]);
         document.getElementById('routeActions').classList.add('show');
         const d=map.distance(h,destLatLng); if(d<=50){ fadeOutRouteThenEnd(); }
-      });
+      }, ()=>{}, { enableHighAccuracy:true, maximumAge:5000, timeout:10000 });
     }
     function fadeOutRouteThenEnd(){
       const l=routeControl&&routeControl._line?routeControl._line:null;
